@@ -1,0 +1,3948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>血液科评估量表计算器(完整版)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SimSun', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 1600px;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            position: sticky;
+            top: 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .sidebar-section {
+            margin-bottom: 15px;
+        }
+
+        .sidebar-section-title {
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-link {
+            display: block;
+            padding: 8px 12px;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 13px;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        .sidebar-link.active {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .container {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .category-nav {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .category-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .category-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .nav-tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+            transition: all 0.3s;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .nav-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        .content {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .scale-section {
+            display: none;
+        }
+
+        .scale-section.active {
+            display: block;
+        }
+
+        .scale-title {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .scale-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .question-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .question-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .option-label:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option-label input[type="radio"],
+        .option-label input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .result-content {
+            font-size: 15px;
+            color: #495057;
+            line-height: 1.8;
+        }
+
+        .result-highlight {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 3px solid #667eea;
+        }
+
+        .risk-group {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .risk-low {
+            background: #28a745;
+            color: white;
+        }
+
+        .risk-intermediate {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .risk-high {
+            background: #dc3545;
+            color: white;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .reference {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .input-number {
+            width: 100px;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .input-number:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .normal-range {
+            font-size: 12px;
+            color: #28a745;
+            background: #d4edda;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .warning-text {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .warning-text.show {
+            display: block;
+        }
+
+        .clinical-implication {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .prognosis-chart {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .prognosis-bar {
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .prognosis-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745 0%, #ffc107 50%, #dc3545 100%);
+            transition: width 0.5s ease;
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            /* 侧边栏在移动端隐藏，改为可折叠 */
+            .sidebar {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 80%;
+                max-width: 300px;
+                height: 100vh;
+                z-index: 1000;
+                overflow-y: auto;
+                background: white;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            }
+
+            .sidebar.show {
+                display: block;
+            }
+
+            /* 添加遮罩层 */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            /* 汉堡菜单按钮 */
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 1001;
+                background: #667eea;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 12px 16px;
+                font-size: 20px;
+                cursor: pointer;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            }
+
+            .menu-toggle:hover {
+                background: #5568d3;
+            }
+
+            .main-wrapper {
+                padding-top: 50px;
+            }
+
+            .container {
+                width: 100%;
+                border-radius: 10px;
+            }
+
+            /* 分类导航优化 */
+            .category-nav {
+                padding: 10px;
+                gap: 8px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .category-btn {
+                padding: 8px 15px;
+                font-size: 13px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            /* 标签导航优化 */
+            .nav-tabs {
+                font-size: 13px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-tab {
+                padding: 12px 15px;
+                font-size: 13px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            /* 内容区域优化 */
+            .content {
+                padding: 20px 15px;
+                max-height: none;
+            }
+
+            .scale-title {
+                font-size: 18px;
+            }
+
+            .scale-description {
+                font-size: 13px;
+            }
+
+            /* 问题组优化 */
+            .question-group {
+                padding: 12px;
+            }
+
+            .question-title {
+                font-size: 15px;
+            }
+
+            /* 选项标签优化 - 增大触摸目标 */
+            .option-label {
+                padding: 12px 10px;
+                font-size: 14px;
+                min-height: 44px;
+                display: flex;
+                align-items: flex-start;
+            }
+
+            .option-label input[type="radio"],
+            .option-label input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                margin-right: 10px;
+                margin-top: 2px;
+                flex-shrink: 0;
+            }
+
+            /* 输入框优化 */
+            .input-number {
+                width: 100%;
+                max-width: 100%;
+                padding: 10px;
+                font-size: 16px;
+            }
+
+            .select-wrapper {
+                position: relative;
+            }
+
+            select {
+                width: 100%;
+                padding: 10px;
+                font-size: 16px;
+                border: 2px solid #dee2e6;
+                border-radius: 5px;
+                background: white;
+                -webkit-appearance: none;
+                appearance: none;
+            }
+
+            /* 按钮优化 */
+            .calculate-btn {
+                padding: 15px;
+                font-size: 16px;
+                min-height: 48px;
+            }
+
+            /* 结果区域优化 */
+            .result-highlight {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .risk-group {
+                display: block;
+                margin: 5px 0 10px 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .clinical-implication,
+            .prognosis-chart {
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .info-box {
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .reference {
+                padding: 12px;
+                font-size: 11px;
+            }
+
+            /* 输入组优化 */
+            .input-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .input-label {
+                margin-bottom: 5px;
+                font-size: 14px;
+            }
+
+            .normal-range {
+                display: inline-block;
+                margin: 5px 0;
+                font-size: 11px;
+            }
+        }
+
+        /* 平板端优化 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .sidebar-link {
+                font-size: 12px;
+                padding: 7px 10px;
+            }
+
+            .container {
+                min-width: 0;
+            }
+        }
+
+        /* 桌面端隐藏菜单按钮 */
+        @media (min-width: 769px) {
+            .menu-toggle {
+                display: none;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .category-nav, .nav-tabs, .calculate-btn, .menu-toggle, .sidebar {
+                display: none;
+            }
+
+            .scale-section {
+                display: block !important;
+            }
+
+            .result-section {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 移动端菜单按钮 -->
+    <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+        ☰
+    </button>
+
+    <!-- 侧边栏遮罩层 -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="main-wrapper">
+        <!-- 侧边导航栏 -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-title">📋 量表索引</div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">通用量表</div>
+                <a class="sidebar-link" onclick="showScale('ecog')">ECOG 体能状态</a>
+                <a class="sidebar-link" onclick="showScale('kps')">KPS 功能状态</a>
+                <a class="sidebar-link" onclick="showScale('nrs')">疼痛 NRS</a>
+                <a class="sidebar-link" onclick="showScale('hads')">HADS 焦虑抑郁</a>
+                <a class="sidebar-link" onclick="showScale('hctci')">HCT-CI 并发症</a>
+                <a class="sidebar-link" onclick="showScale('nrs2002')">NRS2002 营养</a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">淋巴瘤</div>
+                <a class="sidebar-link" onclick="showScale('i')">IPI 评分</a>
+                <a class="sidebar-link" onclick="showScale('flipi')">FLIPI 评分</a>
+                <a class="sidebar-link" onclick="showScale('mipi')">MIPI 评分</a>
+                <a class="sidebar-link" onclick="showScale('annarbor')">Ann Arbor 分期</a>
+                <a class="sidebar-link" onclick="showScale('binet')">CLL Binet 分期</a>
+                <a class="sidebar-link" onclick="showScale('cllipi')">CLL-IPI 评分 ✓</a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">多发性骨髓瘤</div>
+                <a class="sidebar-link" onclick="showScale('iss')">ISS 分期</a>
+                <a class="sidebar-link" onclick="showScale('riss')">R-ISS 分期</a>
+                <a class="sidebar-link" onclick="showScale('ds')">DS 分期</a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">MDS/骨髓衰竭</div>
+                <a class="sidebar-link" onclick="showScale('ipssr')">IPSS-R 评分</a>
+                <a class="sidebar-link" onclick="showScale('ipssm')">IPSS-M 分子评分 ✓</a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">AML/急性白血病</div>
+                <a class="sidebar-link" onclick="showScale('amleln2022')">AML ELN 2022 分层 ✓</a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">MPN/骨髓增殖</div>
+                <a class="sidebar-link" onclick="showScale('ipss')">IPSS 评分</a>
+                <a class="sidebar-link" onclick="showScale('dipss')">DIPSS 评分</a>
+                <a class="sidebar-link" onclick="showScale('ipset')">IPSET 血栓</a>
+                <a class="sidebar-link" onclick="showScale('sokal')">Sokal 评分</a>
+                <a class="sidebar-link" onclick="showScale('eutos')">EUTOS 评分</a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">出血与血栓</div>
+                <a class="sidebar-link" onclick="showScale('isth')">ISTH DIC</a>
+                <a class="sidebar-link" onclick="showScale('4t')">4T's HIT评分</a>
+                <a class="sidebar-link" onclick="showScale('hasbled')">HAS-BLED 出血</a>
+                <a class="sidebar-link" onclick="showScale('wells')">Wells DVT/PE</a>
+                <a class="sidebar-link" onclick="showScale('padua')">Padua VTE</a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">细胞治疗</div>
+                <a class="sidebar-link" onclick="showScale('carstcrs')">CAR-T CRS 分级 ✓</a>
+                <a class="sidebar-link" onclick="showScale('carsticans')">CAR-T ICANS 分级 ✓</a>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="header">
+                <h1>🏥 血液科评估量表计算器(完整版)</h1>
+                <p>包含35+常用评估量表 | 涵盖淋巴瘤、骨髓瘤、MDS、AML、MPN、血栓、CAR-T等 | 实时计算 | 仅供专业医疗人员使用</p>
+            </div>
+
+        <!-- 分类导航 -->
+        <div class="category-nav" id="categoryNav">
+            <button class="category-btn active" onclick="filterCategory('all')">全部</button>
+            <button class="category-btn" onclick="filterCategory('lymphoma')">淋巴瘤</button>
+            <button class="category-btn" onclick="filterCategory('myeloma')">多发性骨髓瘤</button>
+            <button class="category-btn" onclick="filterCategory('mds')">MDS</button>
+            <button class="category-btn" onclick="filterCategory('mpn')">MPN</button>
+            <button class="category-btn" onclick="filterCategory('thrombosis')">出血与血栓</button>
+            <button class="category-btn" onclick="filterCategory('general')">通用量表</button>
+            <button class="category-btn" onclick="filterCategory('other')">其他</button>
+        </div>
+
+        <!-- 量表标签导航 -->
+        <div class="nav-tabs" id="navTabs">
+            <button class="nav-tab active" data-category="general" onclick="showScale('ecog')">ECOG</button>
+            <button class="nav-tab" data-category="general" onclick="showScale('kps')">KPS</button>
+            <button class="nav-tab" data-category="lymphoma" onclick="showScale('i')">IPI</button>
+            <button class="nav-tab" data-category="lymphoma" onclick="showScale('flipi')">FLIPI</button>
+            <button class="nav-tab" data-category="lymphoma" onclick="showScale('mipi')">MIPI</button>
+            <button class="nav-tab" data-category="lymphoma" onclick="showScale('annarbor')">Ann Arbor</button>
+            <button class="nav-tab" data-category="myeloma" onclick="showScale('iss')">ISS</button>
+            <button class="nav-tab" data-category="myeloma" onclick="showScale('riss')">R-ISS</button>
+            <button class="nav-tab" data-category="myeloma" onclick="showScale('ds')">DS分期</button>
+            <button class="nav-tab" data-category="mds" onclick="showScale('ipssr')">IPSS-R</button>
+            <button class="nav-tab" data-category="mds" onclick="showScale('ipssm')">IPSS-M</button>
+            <button class="nav-tab" data-category="mpn" onclick="showScale('ipss')">IPSS</button>
+            <button class="nav-tab" data-category="mpn" onclick="showScale('dipss')">DIPSS</button>
+            <button class="nav-tab" data-category="mpn" onclick="showScale('ipset')">IPSET-thrombosis</button>
+            <button class="nav-tab" data-category="mpn" onclick="showScale('sokal')">Sokal</button>
+            <button class="nav-tab" data-category="mpn" onclick="showScale('eutos')">EUTOS</button>
+            <button class="nav-tab" data-category="thrombosis" onclick="showScale('isth')">ISTH DIC</button>
+            <button class="nav-tab" data-category="thrombosis" onclick="showScale('4t')">4T's</button>
+            <button class="nav-tab" data-category="thrombosis" onclick="showScale('hasbled')">HAS-BLED</button>
+            <button class="nav-tab" data-category="thrombosis" onclick="showScale('wells')">Wells</button>
+            <button class="nav-tab" data-category="thrombosis" onclick="showScale('padua')">Padua</button>
+            <button class="nav-tab" data-category="other" onclick="showScale('hctci')">HCT-CI</button>
+            <button class="nav-tab" data-category="other" onclick="showScale('nrs2002')">NRS2002</button>
+            <button class="nav-tab" data-category="general" onclick="showScale('nrs')">疼痛NRS</button>
+            <button class="nav-tab" data-category="general" onclick="showScale('hads')">HADS</button>
+            <button class="nav-tab" data-category="lymphoma" onclick="showScale('binet')">CLL Binet</button>
+        </div>
+
+        <div class="content">
+            <!-- ECOG体能状态评分 -->
+            <div id="ecog" class="scale-section active" data-category="general">
+                <h2 class="scale-title">ECOG体能状态评分 (Eastern Cooperative Oncology Group)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估患者的整体功能状态和活动能力，用于化疗耐受性评估、治疗方案选择和预后判断。</p>
+                    <p><strong>适用人群：</strong>所有血液肿瘤患者</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>✨ 实时计算：</strong>选择选项后自动显示结果，无需点击计算按钮
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">请选择患者的功能状态</div>
+                    <div class="option-group">
+                        <label class="option-label">
+                            <input type="radio" name="ecog" value="0" onchange="calculateECOG()">
+                            <strong>0级 - 完全活动</strong>：能够毫无限制地进行所有患病前的活动
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="ecog" value="1" onchange="calculateECOG()">
+                            <strong>1级 - 重体力活动受限</strong>：能走动并能进行轻体力或坐姿工作（如办公室工作、家务）
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="ecog" value="2" onchange="calculateECOG()">
+                            <strong>2级 - 生活自理</strong>：能走动并能生活自理，但无法工作；卧床时间少于清醒时间的50%
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="ecog" value="3" onchange="calculateECOG()">
+                            <strong>3级 - 部分自理</strong>：生活仅能部分自理，卧床或坐椅时间超过清醒时间的50%
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="ecog" value="4" onchange="calculateECOG()">
+                            <strong>4级 - 完全丧失活动能力</strong>：无法自理，完全卧床或坐椅
+                        </label>
+                    </div>
+                </div>
+
+                <div class="result-section" id="ecog-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="ecog-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Oken MM, et al. Toxicity and response criteria of the Eastern Cooperative Oncology Group. Am J Clin Oncol. 1982.</p>
+                </div>
+            </div>
+
+            <!-- KPS功能状态评分 -->
+            <div id="kps" class="scale-section" data-category="general">
+                <h2 class="scale-title">卡氏功能状态评分 (Karnofsky Performance Status, KPS)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估患者功能状态和自理能力，较ECOG更细致，适合评估小幅度功能变化。</p>
+                    <p><strong>适用人群：</strong>所有血液肿瘤患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">请选择患者的功能状态</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="kps" value="100"><strong>100分</strong>：正常，无疾病证据</label>
+                        <label class="option-label"><input type="radio" name="kps" value="90"><strong>90分</strong>：正常活动，轻微疾病征象</label>
+                        <label class="option-label"><input type="radio" name="kps" value="80"><strong>80分</strong>：正常活动需努力，有些疾病征象</label>
+                        <label class="option-label"><input type="radio" name="kps" value="70"><strong>70分</strong>：能自理但不能正常活动或工作</label>
+                        <label class="option-label"><input type="radio" name="kps" value="60"><strong>60分</strong>：需要偶尔帮助，但大部分需求能自理</label>
+                        <label class="option-label"><input type="radio" name="kps" value="50"><strong>50分</strong>：需要大量帮助和经常的医疗护理</label>
+                        <label class="option-label"><input type="radio" name="kps" value="40"><strong>40分</strong>：丧失活动能力，需要特殊护理</label>
+                        <label class="option-label"><input type="radio" name="kps" value="30"><strong>30分</strong>：严重丧失活动能力，建议住院</label>
+                        <label class="option-label"><input type="radio" name="kps" value="20"><strong>20分</strong>：病重，需要住院和支持治疗</label>
+                        <label class="option-label"><input type="radio" name="kps" value="10"><strong>10分</strong>：濒死，病程进展迅速</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateKPS()">评估结果</button>
+
+                <div class="result-section" id="kps-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="kps-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Karnofsky DA, et al. The use of rating scales in evaluating chemotherapeutic response in cancer. Cancer Res. 1948.</p>
+                </div>
+            </div>
+
+            <!-- 淋巴瘤IPI评分 -->
+            <div id="i" class="scale-section" data-category="lymphoma">
+                <h2 class="scale-title">淋巴瘤国际预后指数 (IPI)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估侵袭性NHL（特别是DLBCL）患者的预后。</p>
+                    <p><strong>适用人群：</strong>弥漫大B细胞淋巴瘤等侵袭性淋巴瘤</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>✨ 实时计算：</strong>选择风险因素后自动显示结果，无需点击计算按钮
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">风险因素（每项1分）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="i_age" onchange="calculateIPI()">年龄 > 60岁</label>
+                        <label class="option-label"><input type="checkbox" id="i_ldh" onchange="calculateIPI()">LDH > 正常值上限</label>
+                        <label class="option-label"><input type="checkbox" id="i_ecog" onchange="calculateIPI()">ECOG ≥ 2级</label>
+                        <label class="option-label"><input type="checkbox" id="i_stage" onchange="calculateIPI()">Ann Arbor分期 III或IV期</label>
+                        <label class="option-label"><input type="checkbox" id="i_extranodal" onchange="calculateIPI()">结外受累 > 1处</label>
+                    </div>
+                </div>
+
+                <div class="result-section" id="i-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="i-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Shipp MA, et al. The International Non-Hodgkin's Lymphoma Prognostic Factors Project. N Engl J Med. 1993.</p>
+                </div>
+            </div>
+
+            <!-- FLIPI评分 -->
+            <div id="flipi" class="scale-section" data-category="lymphoma">
+                <h2 class="scale-title">滤泡性淋巴瘤国际预后指数 (FLIPI)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估滤泡性淋巴瘤患者的预后。</p>
+                    <p><strong>适用人群：</strong>滤泡性淋巴瘤（1-3a级）</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">风险因素（每项1分）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="flipi_age">年龄 ≥ 60岁</label>
+                        <label class="option-label"><input type="checkbox" id="flipi_stage">Ann Arbor分期 III或IV期</label>
+                        <label class="option-label"><input type="checkbox" id="flipi_hb">血红蛋白 < 120g/L</label>
+                        <label class="option-label"><input type="checkbox" id="flipi_nodes">受累淋巴结区域 ≥ 4个</label>
+                        <label class="option-label"><input type="checkbox" id="flipi_ldh">LDH > 正常值上限</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateFLIPI()">评估结果</button>
+
+                <div class="result-section" id="flipi-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="flipi-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Solal-Céligny P, et al. Follicular Lymphoma International Prognostic Index. Blood. 2004.</p>
+                </div>
+            </div>
+
+            <!-- MIPI评分 -->
+            <div id="mipi" class="scale-section" data-category="lymphoma">
+                <h2 class="scale-title">套细胞淋巴瘤国际预后指数 (MIPI)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估套细胞淋巴瘤患者的预后。</p>
+                    <p><strong>适用人群：</strong>套细胞淋巴瘤（MCL）</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">年龄</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="mipi_age" value="0">< 50岁（0分）</label>
+                        <label class="option-label"><input type="radio" name="mipi_age" value="1">50-59岁（1分）</label>
+                        <label class="option-label"><input type="radio" name="mipi_age" value="2">≥ 60岁（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">ECOG体能状态</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="mipi_ecog" value="0">0-1分（0分）</label>
+                        <label class="option-label"><input type="radio" name="mipi_ecog" value="1">2-4分（1分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">LDH水平</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="mipi_ldh" value="0">正常（0分）</label>
+                        <label class="option-label"><input type="radio" name="mipi_ldh" value="1">高于正常上限（1分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">白细胞计数（×10⁹/L）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="mipi_wbc" value="0">≤ 6.7（0分）</label>
+                        <label class="option-label"><input type="radio" name="mipi_wbc" value="1">6.7-10.0（1分）</label>
+                        <label class="option-label"><input type="radio" name="mipi_wbc" value="2">> 10.0（2分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateMIPI()">评估结果</button>
+
+                <div class="result-section" id="mipi-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="mipi-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Hoster E, et al. A new prognostic index (MIPI) for patients with advanced-stage mantle cell lymphoma. Blood. 2008.</p>
+                </div>
+            </div>
+
+            <!-- Ann Arbor分期 -->
+            <div id="annarbor" class="scale-section" data-category="lymphoma">
+                <h2 class="scale-title">Ann Arbor分期系统</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>淋巴瘤最基础的临床分期系统。</p>
+                    <p><strong>适用人群：</strong>所有类型霍奇金淋巴瘤和非霍奇金淋巴瘤</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">分期</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="annarbor" value="1"><strong>I期</strong>：累及单个淋巴结区域或单个淋巴外器官/部位（IE）</label>
+                        <label class="option-label"><input type="radio" name="annarbor" value="2"><strong>II期</strong>：累及横膈同侧两个或以上淋巴结区域</label>
+                        <label class="option-label"><input type="radio" name="annarbor" value="3"><strong>III期</strong>：累及横膈两侧淋巴结区域</label>
+                        <label class="option-label"><input type="radio" name="annarbor" value="4"><strong>IV期</strong>：弥漫性或播散性累及一个或以上淋巴外器官</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">全身症状</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="annarbor_symptoms" value="A">A：无全身症状</label>
+                        <label class="option-label"><input type="radio" name="annarbor_symptoms" value="B">B：有以下任一症状（发热>38℃、盗汗、6个月内体重下降>10%）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateAnnArbor()">评估结果</button>
+
+                <div class="result-section" id="annarbor-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="annarbor-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Lister TA, et al. Report of a committee convened to discuss the evaluation and staging of patients with Hodgkin's disease: Cotswolds meeting. J Clin Oncol. 1989.</p>
+                </div>
+            </div>
+
+            <!-- MM ISS分期 -->
+            <div id="iss" class="scale-section" data-category="myeloma">
+                <h2 class="scale-title">多发性骨髓瘤ISS分期</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估多发性骨髓瘤患者的预后。</p>
+                    <p><strong>适用人群：</strong>所有多发性骨髓瘤患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血清β2微球蛋白 (mg/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="iss_b2m" value="low">< 3.5 mg/L</label>
+                        <label class="option-label"><input type="radio" name="iss_b2m" value="mid">3.5 - 5.5 mg/L</label>
+                        <label class="option-label"><input type="radio" name="iss_b2m" value="high">≥ 5.5 mg/L</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血清白蛋白 (g/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="iss_alb" value="high">≥ 35 g/L</label>
+                        <label class="option-label"><input type="radio" name="iss_alb" value="low">< 35 g/L</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateISS()">评估结果</button>
+
+                <div class="result-section" id="iss-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="iss-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Greipp PR, et al. International staging system for multiple myeloma. J Clin Oncol. 2005.</p>
+                </div>
+            </div>
+
+            <!-- R-ISS分期 -->
+            <div id="riss" class="scale-section" data-category="myeloma">
+                <h2 class="scale-title">多发性骨髓瘤R-ISS分期（修订版ISS）</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>在ISS基础上增加细胞遗传学和LDH，提供更精确的预后评估。</p>
+                    <p><strong>适用人群：</strong>所有多发性骨髓瘤患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血清β2微球蛋白 (mg/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="riss_b2m" value="low">< 3.5 mg/L</label>
+                        <label class="option-label"><input type="radio" name="riss_b2m" value="mid">3.5 - 5.5 mg/L</label>
+                        <label class="option-label"><input type="radio" name="riss_b2m" value="high">≥ 5.5 mg/L</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血清白蛋白 (g/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="riss_alb" value="high">≥ 35 g/L</label>
+                        <label class="option-label"><input type="radio" name="riss_alb" value="low">< 35 g/L</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">LDH水平</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="riss_ldh" value="normal">正常</label>
+                        <label class="option-label"><input type="radio" name="riss_ldh" value="high">高于正常上限</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">高危细胞遗传学异常（FISH检测）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="riss_fish" value="no">无高危异常</label>
+                        <label class="option-label"><input type="radio" name="riss_fish" value="yes">有高危异常[t(4;14), t(14;16), del(17p)]</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateRISS()">评估结果</button>
+
+                <div class="result-section" id="riss-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="riss-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Palumbo A, et al. Revised International Staging System for Multiple Myeloma. J Clin Oncol. 2015.</p>
+                </div>
+            </div>
+
+            <!-- DS分期 -->
+            <div id="ds" class="scale-section" data-category="myeloma">
+                <h2 class="scale-title">多发性骨髓瘤DS分期（Durie-Salmon）</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>传统的根据肿瘤负荷进行的分期。</p>
+                    <p><strong>适用人群：</strong>多发性骨髓瘤患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血红蛋白 (g/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ds_hb" value="0">> 100（0分）</label>
+                        <label class="option-label"><input type="radio" name="ds_hb" value="1">85-100（1分）</label>
+                        <label class="option-label"><input type="radio" name="ds_hb" value="2">< 85（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血清钙 (mmol/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ds_ca" value="0">≤ 2.75（0分）</label>
+                        <label class="option-label"><input type="radio" name="ds_ca" value="1">> 2.75 - 3.0（1分）</label>
+                        <label class="option-label"><input type="radio" name="ds_ca" value="2">> 3.0（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">骨骼X线检查</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ds_bone" value="0">无或仅有孤立性骨浆细胞瘤（0分）</label>
+                        <label class="option-label"><input type="radio" name="ds_bone" value="1">局限性溶骨性病变（1分）</label>
+                        <label class="option-label"><input type="radio" name="ds_bone" value="2">进展性溶骨性病变（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">M蛋白合成率 (IgG g/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ds_m" value="0">< 50（0分）</label>
+                        <label class="option-label"><input type="radio" name="ds_m" value="1">50-70（1分）</label>
+                        <label class="option-label"><input type="radio" name="ds_m" value="2">> 70（2分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateDS()">评估结果</button>
+
+                <div class="result-section" id="ds-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="ds-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Durie BG, Salmon SE. A clinical staging system for multiple myeloma. Cancer. 1975.</p>
+                </div>
+            </div>
+
+            <!-- IPSS-R评分 -->
+            <div id="ipssr" class="scale-section" data-category="mds">
+                <h2 class="scale-title">MDS IPSS-R评分（修订版国际预后评分系统）</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估MDS患者预后，指导治疗决策。</p>
+                    <p><strong>适用人群：</strong>骨髓增生异常综合征患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">细胞遗传学分组</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ipssr_cyto" value="0">极好（0分）：-Y, del(11q)</label>
+                        <label class="option-label"><input type="radio" name="ipssr_cyto" value="1">好（1分）：正常核型, del(5q), del(12p), del(20q)等</label>
+                        <label class="option-label"><input type="radio" name="ipssr_cyto" value="2">中等（2分）：del(7q), +8等</label>
+                        <label class="option-label"><input type="radio" name="ipssr_cyto" value="3">差（3分）：-7, inv(3), 复杂核型（3个异常）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_cyto" value="4">极差（4分）：复杂核型（>3个异常）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">骨髓原始细胞百分比</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ipssr_blast" value="0">≤ 2%（0分）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_blast" value="1">> 2% - < 5%（1分）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_blast" value="2">5% - < 10%（2分）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_blast" value="3">≥ 10%（3分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血红蛋白 (g/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ipssr_hb" value="0">≥ 100（0分）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_hb" value="1">80 - < 100（1分）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_hb" value="2">< 80（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血小板计数（×10⁹/L）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ipssr_plt" value="0">≥ 100（0分）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_plt" value="1">50 - < 100（1分）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_plt" value="2">< 50（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">中性粒细胞绝对值（×10⁹/L）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ipssr_anc" value="0">≥ 0.8（0分）</label>
+                        <label class="option-label"><input type="radio" name="ipssr_anc" value="1">< 0.8（1分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateIPSSR()">评估结果</button>
+
+                <div class="result-section" id="ipssr-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="ipssr-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Greenberg PL, et al. Revised international prognostic scoring system (IPSS-R) for MDS. Blood. 2012.</p>
+                </div>
+            </div>
+
+            <!-- IPSS-M评分 -->
+            <div id="ipssm" class="scale-section" data-category="mds">
+                <h2 class="scale-title">MDS IPSS-M评分（分子版国际预后评分系统）</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>2022年发布，整合基因突变信息，提供比IPSS-R更精确的预后评估。</p>
+                    <p><strong>适用人群：</strong>骨髓增生异常综合征患者</p>
+                    <p><strong>注意：</strong>需要二代测序（NGS）检测基因突变</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>IPSS-M计算说明：</strong>IPSS-M在IPSS-R基础上根据基因突变谱调整评分。此工具提供基于主要基因突变的简化评估。建议使用专业IPSS-M计算工具进行精确评估。
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">首先计算IPSS-R评分</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="ipssm_base" value="verylow">IPSS-R 极低危（0-1分）</label>
+                        <label class="option-label"><input type="radio" name="ipssm_base" value="low">IPSS-R 低危（2-3分）</label>
+                        <label class="option-label"><input type="radio" name="ipssm_base" value="intermediate">IPSS-R 中危（4-5分）</label>
+                        <label class="option-label"><input type="radio" name="ipssm_base" value="high">IPSS-R 高危（6-7分）</label>
+                        <label class="option-label"><input type="radio" name="ipssm_base" value="veryhigh">IPSS-R 极高危（>7分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">关键驱动基因突变（NGS检测）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="ipssm_tp53">TP53突变（尤其是多打击异常）- 显著增加风险</label>
+                        <label class="option-label"><input type="checkbox" id="ipssm_sf3b1">SF3B1突变（单独突变，无其他不良基因）- 降低风险</label>
+                        <label class="option-label"><input type="checkbox" id="ipssm_other">其他不良基因（ASXL1, RUNX1等）- 增加风险</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateIPSSM()">评估结果</button>
+
+                <div class="result-section" id="ipssm-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="ipssm-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Bernard E, et al. The IPSS-M: A genomic and clinical model for MDS prognosis. Blood. 2022.</p>
+                </div>
+            </div>
+
+            <!-- IPSS评分（骨髓纤维化） -->
+            <div id="ipss" class="scale-section" data-category="mpn">
+                <h2 class="scale-title">原发性骨髓纤维化IPSS评分</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估原发性骨髓纤维化患者的生存期。</p>
+                    <p><strong>适用人群：</strong>原发性骨髓纤维化（PMF）患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">风险因素（每项1分）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="ipss_age">年龄 > 65岁</label>
+                        <label class="option-label"><input type="checkbox" id="ipss_hb">血红蛋白 < 100 g/L</label>
+                        <label class="option-label"><input type="checkbox" id="ipss_wbc">白细胞计数 > 25×10⁹/L</label>
+                        <label class="option-label"><input type="checkbox" id="ipss_blast">外周血原始细胞 ≥ 1%</label>
+                        <label class="option-label"><input type="checkbox" id="ipss_symptoms">全身症状（发热、盗汗、体重下降）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateIPSS()">评估结果</button>
+
+                <div class="result-section" id="ipss-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="ipss-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Cervantes F, et al. International Prognostic Scoring System (IPSS) for myelofibrosis. Blood. 2009.</p>
+                </div>
+            </div>
+
+            <!-- DIPSS评分 -->
+            <div id="dipss" class="scale-section" data-category="mpn">
+                <h2 class="scale-title">原发性骨髓纤维化DIPSS评分（动态IPSS）</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>可在病程中任何时候评估预后（不仅限于诊断时）。</p>
+                    <p><strong>适用人群：</strong>原发性骨髓纤维化（PMF）患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">风险因素</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="dipss_age">年龄 > 65岁（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="dipss_hb">血红蛋白 < 100 g/L（2分）</label>
+                        <label class="option-label"><input type="checkbox" id="dipss_wbc">白细胞计数 > 25×10⁹/L（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="dipss_blast">外周血原始细胞 ≥ 1%（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="dipss_symptoms">全身症状（1分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateDIPSS()">评估结果</button>
+
+                <div class="result-section" id="dipss-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="dipss-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Passamonti F, et al. Dynamic IPSS for myelofibrosis (DIPSS). Blood. 2010.</p>
+                </div>
+            </div>
+
+            <!-- IPSET-thrombosis评分 -->
+            <div id="ipset" class="scale-section" data-category="mpn">
+                <h2 class="scale-title">原发性血小板增多症IPSET-thrombosis评分</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估ET患者的血栓风险，指导抗栓治疗决策。</p>
+                    <p><strong>适用人群：</strong>原发性血小板增多症（ET）患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">风险因素</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="ipset_age">年龄 > 60岁（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="ipset_cv">心血管危险因素（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="ipset_thrombosis">既往血栓史（2分）</label>
+                        <label class="option-label"><input type="checkbox" id="ipset_jak2">JAK2 V617F突变阳性（2分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateIPSET()">评估结果</button>
+
+                <div class="result-section" id="ipset-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="ipset-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Barbui T, et al. IPSET-thrombosis for ET. Blood. 2013.</p>
+                </div>
+            </div>
+
+            <!-- Sokal评分（CML） -->
+            <div id="sokal" class="scale-section" data-category="mpn">
+                <h2 class="scale-title">慢性髓系白血病Sokal评分</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估CML慢性期患者的预后。</p>
+                    <p><strong>适用人群：</strong>慢性髓系白血病（CML）慢性期患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">年龄（岁）</div>
+                    <input type="number" id="sokal_age" class="input-number" placeholder="输入年龄" min="0" max="120">
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">脾脏大小（cm，肋缘下）</div>
+                    <input type="number" id="sokal_spleen" class="input-number" placeholder="输入脾脏大小" min="0">
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血小板计数（×10⁹/L）</div>
+                    <input type="number" id="sokar_plt" class="input-number" placeholder="输入血小板" min="0">
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">外周血原始细胞百分比（%）</div>
+                    <input type="number" id="sokal_blast" class="input-number" placeholder="输入原始细胞%" min="0" max="100">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateSokal()">评估结果</button>
+
+                <div class="result-section" id="sokal-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="sokal-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Sokal JE, et al. Prognostic discrimination in "good-risk" chronic granulocytic leukemia. Blood. 1984.</p>
+                </div>
+            </div>
+
+            <!-- EUTOS评分（CML） -->
+            <div id="eutos" class="scale-section" data-category="mpn">
+                <h2 class="scale-title">慢性髓系白血病EUTOS评分</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>欧洲开发的简化CML预后评分系统。</p>
+                    <p><strong>适用人群：</strong>慢性髓系白血病（CML）患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">嗜碱粒细胞百分比（%）</div>
+                    <input type="number" id="eutos_basophil" class="input-number" placeholder="输入%" min="0" max="100">
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">脾脏大小（cm，肋缘下）</div>
+                    <input type="number" id="eutos_spleen" class="input-number" placeholder="输入脾脏大小" min="0">
+                </div>
+
+                <button class="calculate-btn" onclick="calculateEUTOS()">评估结果</button>
+
+                <div class="result-section" id="eutos-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="eutos-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Hasford J, et al. EUTOS score for CML. J Clin Oncol. 2011.</p>
+                </div>
+            </div>
+
+            <!-- ISTH DIC评分 -->
+            <div id="isth" class="scale-section" data-category="thrombosis">
+                <h2 class="scale-title">ISTH DIC评分系统</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>诊断弥散性血管内凝血（DIC）。</p>
+                    <p><strong>适用人群：</strong>疑似DIC患者（感染、肿瘤、创伤等）</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血小板计数（×10⁹/L）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="isth_plt" value="0">≥ 100（0分）</label>
+                        <label class="option-label"><input type="radio" name="isth_plt" value="1">< 100（1分）</label>
+                        <label class="option-label"><input type="radio" name="isth_plt" value="2">< 50（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">D-二聚体（或FDP）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="isth_ddimer" value="0">无升高（0分）</label>
+                        <label class="option-label"><input type="radio" name="isth_ddimer" value="2">中度升高（2分）</label>
+                        <label class="option-label"><input type="radio" name="isth_ddimer" value="3">强度升高（3分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">凝血酶原时间（PT）延长（秒）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="isth_pt" value="0">< 3（0分）</label>
+                        <label class="option-label"><input type="radio" name="isth_pt" value="1">3 - 6（1分）</label>
+                        <label class="option-label"><input type="radio" name="isth_pt" value="2">> 6（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">纤维蛋白原水平（g/L）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="isth_fibrinogen" value="0">≥ 1.0（0分）</label>
+                        <label class="option-label"><input type="radio" name="isth_fibrinogen" value="1">< 1.0（1分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateISTH()">评估结果</button>
+
+                <div class="result-section" id="isth-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="isth-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Taylor FB Jr, et al. Scientific Subcommittee on DIC: ISTH scoring system. J Thromb Haemost. 2001.</p>
+                </div>
+            </div>
+
+            <!-- 4T's评分 -->
+            <div id="4t" class="scale-section" data-category="thrombosis">
+                <h2 class="scale-title">4T's评分（肝素诱导的血小板减少症）</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>快速评估HIT概率。</p>
+                    <p><strong>适用人群：</strong>疑似肝素诱导的血小板减少症（HIT）患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血小板减少程度</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="4t_plt" value="0">下降< 30%或最低值< 10×10⁹/L（0分）</label>
+                        <label class="option-label"><input type="radio" name="4t_plt" value="1">下降30-50%或最低值10-19×10⁹/L（1分）</label>
+                        <label class="option-label"><input type="radio" name="4t_plt" value="2">下降> 50%且最低值≥20×10⁹/L（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血小板减少时间</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="4t_time" value="0">≤1天且无近期肝素暴露（0分）</label>
+                        <label class="option-label"><input type="radio" name="4t_time" value="1">> 10天或时间不清（1分）</label>
+                        <label class="option-label"><input type="radio" name="4t_time" value="2">5-10天或≤1天（近5-30天暴露）（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血栓形成</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="4t_thrombosis" value="0">无（0分）</label>
+                        <label class="option-label"><input type="radio" name="4t_thrombosis" value="1">进展性/复发性血栓或可疑血栓（1分）</label>
+                        <label class="option-label"><input type="radio" name="4t_thrombosis" value="2">新发血栓、皮肤坏死或急性全身反应（2分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">其他原因导致血小板减少</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="4t_other" value="0">明确有（0分）</label>
+                        <label class="option-label"><input type="radio" name="4t_other" value="1">有可能（1分）</label>
+                        <label class="option-label"><input type="radio" name="4t_other" value="2">无（2分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculate4T()">评估结果</button>
+
+                <div class="result-section" id="4t-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="4t-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Warkentin TE, et al. The 4T's scoring system for HIT. Blood. 2003.</p>
+                </div>
+            </div>
+
+            <!-- HAS-BLED评分 -->
+            <div id="hasbled" class="scale-section" data-category="thrombosis">
+                <h2 class="scale-title">HAS-BLED出血风险评分</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估房颤患者抗凝治疗的出血风险。</p>
+                    <p><strong>适用人群：</strong>房颤患者抗凝治疗前</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">风险因素（每项1分）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="hasbled_htn">H - 高血压（收缩压>160mmHg）</label>
+                        <label class="option-label"><input type="checkbox" id="hasbled_renal">A - 肾功能异常（透析、移植、肌酐≥200μmol/L）</label>
+                        <label class="option-label"><input type="checkbox" id="hasbled_liver">A - 肝功能异常（肝硬化、胆红素>2×正常上限等）</label>
+                        <label class="option-label"><input type="checkbox" id="hasbled_stroke">S - 卒中史</label>
+                        <label class="option-label"><input type="checkbox" id="hasbled_bleeding">B - 出血史或出血倾向</label>
+                        <label class="option-label"><input type="checkbox" id="hasbled_inr">L - INR不稳定（波动大/治疗窗时间<60%）</label>
+                        <label class="option-label"><input type="checkbox" id="hasbled_age">E - 年龄>65岁</label>
+                        <label class="option-label"><input type="checkbox" id="hasbled_drugs">D - 药物/酒精（合用抗血小板药、NSAIDs；酗酒）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateHASBLED()">评估结果</button>
+
+                <div class="result-section" id="hasbled-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="hasbled-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Pisters R, et al. HAS-BLED bleeding risk score. Chest. 2010.</p>
+                </div>
+            </div>
+
+            <!-- Wells评分（DVT/PE） -->
+            <div id="wells" class="scale-section" data-category="thrombosis">
+                <h2 class="scale-title">Wells评分（深静脉血栓/肺栓塞）</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>快速评估DVT/PE概率。</p>
+                    <p><strong>适用人群：</strong>疑似深静脉血栓（DVT）或肺栓塞（PE）患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">DVT/PE风险因素（Wells评分）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="wells_cancer">活动性癌症（1.5分）</label>
+                        <label class="option-label"><input type="checkbox" id="wells_paralysis">DVT症状（下肢全腿肿胀等）（1.5分）</label>
+                        <label class="option-label"><input type="checkbox" id="wells_bedridden">沿深静脉径路局部压痛（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="wells_localtenderness">全肢水肿（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="wells_entireswelling">小腿周径比对侧大>3cm（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="wells_calftime">侧支浅静脉（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="wells_collateral">既往DVT/PE史（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="wells_history">咯血（PE）（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="wells_hemoptysis">心率>100次/分（PE）（1.5分）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">其他诊断可能性</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="wells_alternative" value="no">其他诊断可能性不大或不低于DVT/PE（0分）</label>
+                        <label class="option-label"><input type="radio" name="wells_alternative" value="yes">其他诊断可能性更大（-2分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateWells()">评估结果</button>
+
+                <div class="result-section" id="wells-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="wells-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Wells PS, et al. Evaluation of DVT. Lancet. 1997; Wells PS, et al. Evaluation of PE. Thromb Haemost. 2000.</p>
+                </div>
+            </div>
+
+            <!-- Padua评分 -->
+            <div id="padua" class="scale-section" data-category="thrombosis">
+                <h2 class="scale-title">Padua评分（内科住院患者VTE风险）</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估内科住院患者的静脉血栓栓塞症（VTE）风险。</p>
+                    <p><strong>适用人群：</strong>内科住院患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">风险因素</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" id="padua_cancer">活动性癌症（3分）</label>
+                        <label class="option-label"><input type="checkbox" id="padua_history">既往VTE史（3分）</label>
+                        <label class="option-label"><input type="checkbox" id="padua_reduced">活动性降低（卧床/制动≥3天）（3分）</label>
+                        <label class="option-label"><input type="checkbox" id="padua_highrisk">高血栓风险疾病（3分）</label>
+                        <label class="option-label"><input type="checkbox" id="padua_age">年龄≥70岁（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="padua_heart">心衰和/或呼吸衰竭（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="padua_mi">急性心梗/缺血性卒中（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="padua_obesity">肥胖（BMI≥30）（1分）</label>
+                        <label class="option-label"><input type="checkbox" id="padua_hormones">正在进行激素治疗（1分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculatePadua()">评估结果</button>
+
+                <div class="result-section" id="padua-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="padua-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Barbar S, et al. Padua prediction score. J Thromb Haemost. 2010.</p>
+                </div>
+            </div>
+
+            <!-- HCT-CI评分 -->
+            <div id="hctci" class="scale-section" data-category="other">
+                <h2 class="scale-title">造血干细胞移植合并症指数 (HCT-CI)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估移植前合并症，预测移植后非复发死亡率。</p>
+                    <p><strong>适用人群：</strong>拟行造血干细胞移植的患者</p>
+                </div>
+
+                <div class="info-box">
+                    请根据合并症的严重程度评分：每项合并症根据严重程度评1-3分。此处提供简化版本。
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">常见合并症（选择存在的项目）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="checkbox" class="hctci-item">冠心病</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">充血性心力衰竭</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">心律失常</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">肺疾病（COPD、肺纤维化等）</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">肝病（肝硬化、肝炎）</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">肾功能不全（肌酐清除率<40ml/min）</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">糖尿病</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">既往实体肿瘤史</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">严重风湿性疾病</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">严重神经系统疾病</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">精神疾病</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">KPS < 90%</label>
+                        <label class="option-label"><input type="checkbox" class="hctci-item">既往干细胞移植史</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">估算总分</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="hctci_score" value="0">0分</label>
+                        <label class="option-label"><input type="radio" name="hctci_score" value="1-2">1-2分</label>
+                        <label class="option-label"><input type="radio" name="hctci_score" value="3-4">3-4分</label>
+                        <label class="option-label"><input type="radio" name="hctci_score" value="5plus">≥5分</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateHCTCI()">评估结果</button>
+
+                <div class="result-section" id="hctci-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="hctci-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Sorror ML, et al. Hematopoietic cell transplantation comorbidity index. Clin Cancer Res. 2005.</p>
+                </div>
+            </div>
+
+            <!-- NRS2002营养风险筛查 -->
+            <div id="nrs2002" class="scale-section" data-category="other">
+                <h2 class="scale-title">营养风险筛查2002 (NRS2002)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>筛查住院患者的营养风险。</p>
+                    <p><strong>适用人群：</strong>住院患者（包括血液肿瘤患者）</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">1. 营养受损状况</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="nrs2002_nutri" value="0">正常（0分）</label>
+                        <label class="option-label"><input type="radio" name="nrs2002_nutri" value="1">轻度（1分）：3个月内体重丢失>5%或前1周进食量为正常需要量的50-75%</label>
+                        <label class="option-label"><input type="radio" name="nrs2002_nutri" value="2">中度（2分）：2个月内体重丢失>5%或BMI 18.5-20.5+一般情况差或前1周进食量为25-60%</label>
+                        <label class="option-label"><input type="radio" name="nrs2002_nutri" value="3">重度（3分）：1个月内体重丢失>5%（3个月内>15%）或BMI<18.5+一般情况差或前1周进食量为0-25%</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">2. 疾病严重程度</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="nrs2002_disease" value="0">正常（0分）</label>
+                        <label class="option-label"><input type="radio" name="nrs2002_disease" value="1">轻度（1分）：髋骨骨折、慢性疾病、糖尿病、肿瘤</label>
+                        <label class="option-label"><input type="radio" name="nrs2002_disease" value="2">中度（2分）：腹部大手术、卒中、重症肺炎、血液恶性肿瘤</label>
+                        <label class="option-label"><input type="radio" name="nrs2002_disease" value="3">重度（3分）：颅脑损伤、骨髓移植、ICU患者（APACHE>10）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">3. 年龄</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="nrs2002_age" value="0">< 70岁（0分）</label>
+                        <label class="option-label"><input type="radio" name="nrs2002_age" value="1">≥ 70岁（+1分）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateNRS2002()">评估结果</button>
+
+                <div class="result-section" id="nrs2002-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="nrs2002-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Kondrup J, et al. Nutritional Risk Screening (NRS 2002). Clin Nutr. 2003.</p>
+                </div>
+            </div>
+
+            <!-- 疼痛NRS评分 -->
+            <div id="nrs" class="scale-section" data-category="general">
+                <h2 class="scale-title">疼痛数字评分法 (Numeric Rating Scale, NRS)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>快速评估患者疼痛程度和治疗效果。</p>
+                    <p><strong>适用人群：</strong>所有癌症患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">请选择患者当前疼痛程度（0-10分）</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="nrs_pain" value="0"><strong>0分</strong> - 无痛</label>
+                        <label class="option-label"><input type="radio" name="nrs_pain" value="1"><strong>1-3分</strong> - 轻度疼痛（不影响睡眠）</label>
+                        <label class="option-label"><input type="radio" name="nrs_pain" value="4"><strong>4-6分</strong> - 中度疼痛（影响睡眠）</label>
+                        <label class="option-label"><input type="radio" name="nrs_pain" value="7"><strong>7-10分</strong> - 重度疼痛（严重影响睡眠）</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateNRS_Pain()">评估结果</button>
+
+                <div class="result-section" id="nrs-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="nrs-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Caraceni A, et al. Use of cancer pain registries in clinical practice. J Pain Symptom Manage. 2018.</p>
+                </div>
+            </div>
+
+            <!-- HADS量表 -->
+            <div id="hads" class="scale-section" data-category="general">
+                <h2 class="scale-title">医院焦虑抑郁量表 (HADS)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>筛查癌症患者的焦虑和抑郁症状。</p>
+                    <p><strong>适用人群：</strong>综合医院躯体疾病患者</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>说明：</strong>由于HADS包含14个问题，此处提供简化版。建议使用专业HADS量表或HADS应用程序进行完整评估。
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">焦虑症状评估</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="hads_anxiety" value="0">正常（0-7分）：无明显焦虑症状</label>
+                        <label class="option-label"><input type="radio" name="hads_anxiety" value="1">轻度（8-10分）：轻度焦虑症状</label>
+                        <label class="option-label"><input type="radio" name="hads_anxiety" value="2">中度（11-14分）：中度焦虑症状</label>
+                        <label class="option-label"><input type="radio" name="hads_anxiety" value="3">重度（15-21分）：重度焦虑症状</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">抑郁症状评估</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="hads_depression" value="0">正常（0-7分）：无明显抑郁症状</label>
+                        <label class="option-label"><input type="radio" name="hads_depression" value="1">轻度（8-10分）：轻度抑郁症状</label>
+                        <label class="option-label"><input type="radio" name="hads_depression" value="2">中度（11-14分）：中度抑郁症状</label>
+                        <label class="option-label"><input type="radio" name="hads_depression" value="3">重度（15-21分）：重度抑郁症状</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateHADS_Simple()">评估结果</button>
+
+                <div class="result-section" id="hads-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="hads-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Zigmond AS, Snaith RP. The hospital anxiety and depression scale. Acta Psychiatr Scand. 1983.</p>
+                </div>
+            </div>
+
+            <!-- CLL Binet分期 -->
+            <div id="binet" class="scale-section" data-category="lymphoma">
+                <h2 class="scale-title">慢性淋巴细胞白血病 Binet分期</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估CLL患者的疾病分期和预后。</p>
+                    <p><strong>适用人群：</strong>慢性淋巴细胞白血病患者</p>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血红蛋白水平 (g/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="binet_hb" value="normal">≥ 100（正常）</label>
+                        <label class="option-label"><input type="radio" name="binet_hb" value="low">< 100（降低）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">血小板计数 (×10⁹/L)</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="binet_plt" value="normal">≥ 100（正常）</label>
+                        <label class="option-label"><input type="radio" name="binet_plt" value="low">< 100（降低）</label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">受累淋巴结区域数</div>
+                    <div class="option-group">
+                        <label class="option-label"><input type="radio" name="binet_nodes" value="0-2">0-2个区域</label>
+                        <label class="option-label"><input type="radio" name="binet_nodes" value="3plus">≥ 3个区域</label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateBinet()">评估结果</button>
+
+                <div class="result-section" id="binet-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="binet-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Binet JL, et al. Chronic lymphocytic leukemia: clinical staging and prognosis. Blood. 1977.</p>
+                </div>
+            </div>
+
+            <!-- CLL-IPI评分 -->
+            <div id="cllipi" class="scale-section" data-category="lymphoma">
+                <h2 class="scale-title">CLL国际预后指数 (CLL-IPI)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估慢性淋巴细胞白血病(CLL)患者的预后，结合了临床、生化和分子学标志物。</p>
+                    <p><strong>适用人群：</strong>慢性淋巴细胞白血病(CLL)患者</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>提示：</strong>CLL-IPI评分系统整合了5个独立的预后因素，每个因素1分。选择所有适用的风险因素，系统将自动计算总分并进行危险度分层。
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">风险因素（每项1分）</div>
+                    <div class="option-group">
+                        <label class="option-label">
+                            <input type="checkbox" id="cllipi_tp53">
+                            TP53异常（缺失或突变，17p缺失或TP53突变）
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" id="cllipi_ighv">
+                            IGHV未突变状态
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" id="cllipi_beta2">
+                            血清β2微球蛋白 > 3.5 mg/L
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" id="cllipi_stage">
+                            临床分期 Rai II-IV期或 Binet B-C期
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" id="cllipi_age">
+                            年龄 > 65岁
+                        </label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateCLLIPI()">评估结果</button>
+
+                <div class="result-section" id="cllipi-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="cllipi-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Rossi D, et al. International CLL-IPI working group. A new prognostic score for CLL. Blood. 2016.</p>
+                </div>
+            </div>
+
+            <!-- CAR-T CRS分级 -->
+            <div id="carstcrs" class="scale-section" data-category="car-t">
+                <h2 class="scale-title">CAR-T细胞因子风暴分级 (ASTCT 2019)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估CAR-T治疗后细胞因子释放综合征(CRS)的严重程度。</p>
+                    <p><strong>适用人群：</strong>接受CAR-T细胞治疗的患者</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>关键标准：</strong>CRS分级主要依据发热和低血压情况，需要排除其他原因（如感染、肿瘤热等）。
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">1. 发热情况</div>
+                    <div class="option-group">
+                        <label class="option-label">
+                            <input type="radio" name="crs_fever" value="no">
+                            无发热（体温 ≤ 38°C）
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="crs_fever" value="yes">
+                            有发热（体温 ≥ 38°C）
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">2. 低血压情况</div>
+                    <div class="input-group">
+                        <div class="option-group">
+                            <label class="option-label">
+                                <input type="radio" name="crs_bp" value="0">
+                                无低血压
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="crs_bp" value="1">
+                                低血压（无需升压药）<span class="normal-range">SBP < 90mmHg 或 MAP < 60mmHg</span>
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="crs_bp" value="2">
+                                需一种升压药（除外血管加压素）
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="crs_bp" value="3">
+                                需多种升压药
+                            </label>
+                            <label class="option-label">
+                                <input type="radio" name="crs_bp" value="4">
+                                危及生命的低血压
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">3. 是否需要氧疗?</div>
+                    <div class="option-group">
+                        <label class="option-label">
+                            <input type="radio" name="crs_oxygen" value="no">
+                            否（SpO2 ≥ 90%在室内空气下）
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="crs_oxygen" value="yes">
+                            是（需要低流量吸氧）
+                        </label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateCARSCRS()">评估结果</button>
+
+                <div class="result-section" id="carstcrs-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="carstcrs-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Lee DW, et al. ASTCT consensus grading for cytokine release syndrome and neurotoxicity. Biol Blood Marrow Transplant. 2019.</p>
+                </div>
+            </div>
+
+            <!-- CAR-T ICANS分级 -->
+            <div id="carsticans" class="scale-section" data-category="car-t">
+                <h2 class="scale-title">CAR-T免疫效应细胞相关神经毒性分级 (ICANS 2019)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>评估CAR-T治疗后神经毒性(ICANS)的严重程度。</p>
+                    <p><strong>适用人群：</strong>接受CAR-T细胞治疗的患者</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>评估工具：</strong>ICANS评估包括免疫效应细胞相关脑病(ICE)评分、意识水平、运动功能、语言功能等多个维度。
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">免疫效应细胞相关脑病(ICE)评分 - 最高10分，每项正常得1分</div>
+                    <div class="option-group">
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>1. 定向力（最多4分）</strong>
+                            <div style="margin-left: 20px;">
+                                <label class="option-label"><input type="checkbox" id="ice_year">知道当前年份</label>
+                                <label class="option-label"><input type="checkbox" id="ice_month">知道当前月份</label>
+                                <label class="option-label"><input type="checkbox" id="ice_day">知道当前日期</label>
+                                <label class="option-label"><input type="checkbox" id="ice_city">知道自己所在城市</label>
+                                <label class="option-label"><input type="checkbox" id="ice_hospital">知道自己所在医院</label>
+                            </div>
+                        </div>
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>2. 命名能力（最多3分）</strong> - 请患者命名3个常见物体
+                            <div class="input-hint">例如：手表、笔、桌子（每答对1个得1分）</div>
+                            <div class="input-group">
+                                <span class="input-label">答对数量：</span>
+                                <select id="ice_naming" class="input-number">
+                                    <option value="">请选择</option>
+                                    <option value="0">0个</option>
+                                    <option value="1">1个</option>
+                                    <option value="2">2个</option>
+                                    <option value="3">3个</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>3. 遵从指令（最多1分）</strong>
+                            <div style="margin-left: 20px;">
+                                <label class="option-label"><input type="checkbox" id="ice_commands">能完成"举起双手"、"握拳"等指令</label>
+                            </div>
+                        </div>
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>4. 书写能力（最多1分）</strong>
+                            <div class="input-hint">让患者写一句完整的句子</div>
+                            <div style="margin-left: 20px;">
+                                <label class="option-label"><input type="radio" name="ice_writing" value="1">正常</label>
+                                <label class="option-label"><input type="radio" name="ice_writing" value="0">异常或无法完成</label>
+                            </div>
+                        </div>
+                        <div style="padding: 10px; background: white; border-radius: 5px;">
+                            <strong>5. 注意力（最多1分）</strong>
+                            <div class="input-hint">连续说出月份倒序（从12月到1月）或数字倒序（从20到1）</div>
+                            <div style="margin-left: 20px;">
+                                <label class="option-label"><input type="radio" name="ice_attention" value="1">能完成且无错误</label>
+                                <label class="option-label"><input type="radio" name="ice_attention" value="0">无法完成或有错误</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">意识水平</div>
+                    <div class="option-group">
+                        <label class="option-label">
+                            <input type="radio" name="icans_loc" value="0">
+                            清醒
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="icans_loc" value="1">
+                            嗜睡（能被唤醒并应答）
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="icans_loc" value="2">
+                            昏睡（强刺激可唤醒，应答不恰当）
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="icans_loc" value="3">
+                            昏迷（即使强刺激也无应答）
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">运动功能</div>
+                    <div class="option-group">
+                        <label class="option-label">
+                            <input type="radio" name="icans_motor" value="0">
+                            正常
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="icans_motor" value="1">
+                            局灶性无力（如单瘫、偏瘫）
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="icans_motor" value="2">
+                            无法完成指令性动作但不伴局灶性无力
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="icans_motor" value="3">
+                            无反应/无反射
+                        </label>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateICANS()">评估结果</button>
+
+                <div class="result-section" id="carsticans-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="carsticans-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Lee DW, et al. ASTCT consensus grading for cytokine release syndrome and neurotoxicity. Biol Blood Marrow Transplant. 2019.</p>
+                </div>
+            </div>
+
+            <!-- AML ELN 2022预后分层 -->
+            <div id="amleln2022" class="scale-section" data-category="aml">
+                <h2 class="scale-title">AML预后分层 (ELN 2022)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>根据细胞遗传学和分子学异常对急性髓系白血病(AML)进行风险分层，指导治疗决策。</p>
+                    <p><strong>适用人群：</strong>新诊断的AML患者（非APL）</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>重要提示：</strong>ELN 2022更新了多个基因异常的分层标准，包括NPM1、FLT3-ITD等。请根据完整的基因检测报告选择所有存在的异常。
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">细胞遗传学/分子学异常</div>
+                    <div class="option-group">
+                        <div style="padding: 10px; background: #fff3cd; border-radius: 5px; margin-bottom: 10px;">
+                            <strong style="color: #856404;">预后良好异常：</strong>
+                            <label class="option-label"><input type="checkbox" id="aml_favor1">t(8;21)(q22;q22);RUNX1::RUNX1T1</label>
+                            <label class="option-label"><input type="checkbox" id="aml_favor2">inv(16)(p13.1q22)或t(16;16)(p13.1;q22);CBFB::MYH11</label>
+                            <label class="option-label"><input type="checkbox" id="aml_favor3">t(15;17)(q24;q21);PML::RARA（急性早幼粒细胞白血病）</label>
+                            <label class="option-label"><input type="checkbox" id="aml_favor4">NPM1 突变（且无FLT3-ITD或FLT3-ITD低等位基因比例）</label>
+                            <label class="option-label"><input type="checkbox" id="aml_favor5">CEBPA 双等位基因突变</label>
+                        </div>
+
+                        <div style="padding: 10px; background: #f8d7da; border-radius: 5px; margin-bottom: 10px;">
+                            <strong style="color: #721c24;">预后不良异常：</strong>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse1">复杂核型（≥3个染色体异常）</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse2">单体核型</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse3">-5或del(5q)</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse4">-7</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse5">t(6;9)(p23;q34.1);DEK::NUP214</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse6">t(v;11q23.3);KMT2A重排</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse7">t(9;22)(q34.1;q11.2);BCR::ABL1</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse8">TP53 突变</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse9">FLT3-ITD 高等位基因比例（突变等位基因频率>0.5）</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse10">ASXL1 突变</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse11">BCOR 突变</label>
+                            <label class="option-label"><input type="checkbox" id="aml_adverse12">RUNX1 突变</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateAMLELN2022()">评估结果</button>
+
+                <div class="result-section" id="amleln2022-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="amleln2022-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Döhner H, et al. Diagnosis and management of AML in adults: 2022 ELN recommendations. Blood. 2022.</p>
+                </div>
+            </div>
+
+            <!-- IPSS-M分子评分 -->
+            <div id="ipssm" class="scale-section" data-category="mds">
+                <h2 class="scale-title">MDS分子预后评分系统 (IPSS-M, 2022)</h2>
+                <div class="scale-description">
+                    <p><strong>用途：</strong>整合临床病理学和分子学标志物对MDS进行预后评估，是IPSS-R的升级版。</p>
+                    <p><strong>适用人群：</strong>骨髓增生异常综合征(MDS)患者</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>说明：</strong>IPSS-M整合了6个分子标志物（TP53, SF3B1, ASXL1, DNMT3A, U2AF1, RUNX1）和IPSS-R的临床病理学参数。
+                    <br><strong>注意：</strong>分子标志物为选填项，如未检测可选择"未检测/未知"。
+                </div>
+
+                <div class="question-group">
+                    <div class="question-title">分子标志物</div>
+                    <div class="option-group">
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>TP53 突变状态：</strong>
+                            <div class="input-group">
+                                <select id="ipssm_tp53" class="input-number" onchange="calculateIPSSM()">
+                                    <option value="0">未突变/多等位基因缺失>1个</option>
+                                    <option value="1">单打击突变或VAF<10%</option>
+                                    <option value="2">多打击突变或VAF≥10%</option>
+                                    <option value="3">未检测/未知</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>SF3B1 突变状态：</strong>
+                            <div class="input-group">
+                                <select id="ipssm_sf3b1" class="input-number" onchange="calculateIPSSM()">
+                                    <option value="0">未突变</option>
+                                    <option value="1">突变</option>
+                                    <option value="2">未检测/未知</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>ASXL1 突变状态：</strong>
+                            <div class="input-group">
+                                <select id="ipssm_asxl1" class="input-number" onchange="calculateIPSSM()">
+                                    <option value="0">未突变</option>
+                                    <option value="1">突变</option>
+                                    <option value="2">未检测/未知</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>RUNX1 突变状态：</strong>
+                            <div class="input-group">
+                                <select id="ipssm_runx1" class="input-number" onchange="calculateIPSSM()">
+                                    <option value="0">未突变</option>
+                                    <option value="1">突变</option>
+                                    <option value="2">未检测/未知</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>DNMT3A 突变状态：</strong>
+                            <div class="input-group">
+                                <select id="ipssm_dnmt3a" class="input-number" onchange="calculateIPSSM()">
+                                    <option value="0">未突变</option>
+                                    <option value="1">突变</option>
+                                    <option value="2">未检测/未知</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="padding: 10px; background: white; border-radius: 5px; margin-bottom: 10px;">
+                            <strong>U2AF1 突变状态：</strong>
+                            <div class="input-group">
+                                <select id="ipssm_u2af1" class="input-number" onchange="calculateIPSSM()">
+                                    <option value="0">未突变</option>
+                                    <option value="1">突变</option>
+                                    <option value="2">未检测/未知</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="calculateIPSSM()">评估结果</button>
+
+                <div class="result-section" id="ipssm-result">
+                    <div class="result-title">评估结果</div>
+                    <div class="result-content" id="ipssm-content"></div>
+                </div>
+
+                <div class="reference">
+                    <p><strong>参考文献：</strong>Greenberg PL, et al. IPSS-M: a prognostic model for MDS incorporating genomic data. Blood. 2022.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 移动端侧边栏切换功能
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+
+            // 防止背景滚动
+            if (sidebar.classList.contains('show')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // 点击侧边栏链接后自动关闭侧边栏（移动端）
+        function showScale(scaleId) {
+            // 隐藏所有量表
+            const sections = document.querySelectorAll('.scale-section');
+            sections.forEach(section => section.classList.remove('active'));
+
+            // 移除所有标签的active状态
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // 移除侧边导航的active状态
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            sidebarLinks.forEach(link => link.classList.remove('active'));
+
+            // 显示选中的量表
+            const scaleElement = document.getElementById(scaleId);
+            if (scaleElement) {
+                scaleElement.classList.add('active');
+            }
+
+            // 更新导航标签状态（如果是从标签点击）
+            if (event && event.target && event.target.classList.contains('nav-tab')) {
+                event.target.classList.add('active');
+            } else {
+                // 如果从侧边栏点击，找到对应的标签并激活
+                const matchingTab = document.querySelector(`.nav-tab[onclick*="'${scaleId}'"]`);
+                if (matchingTab) {
+                    matchingTab.classList.add('active');
+                }
+            }
+
+            // 移动端：关闭侧边栏
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            // 滚动到顶部
+            const content = document.querySelector('.content');
+            if (content) {
+                content.scrollTop = 0;
+            }
+            window.scrollTo(0, 0);
+        }
+
+        // 分类筛选功能
+        function filterCategory(category) {
+            const tabs = document.querySelectorAll('.nav-tab');
+            const buttons = document.querySelectorAll('.category-btn');
+
+            // 更新按钮状态
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 筛选标签
+            tabs.forEach(tab => {
+                if (category === 'all' || tab.dataset.category === category) {
+                    tab.style.display = '';
+                } else {
+                    tab.style.display = 'none';
+                }
+            });
+        }
+
+        // 显示量表功能
+        function showScale(scaleId) {
+            // 隐藏所有量表
+            const sections = document.querySelectorAll('.scale-section');
+            sections.forEach(section => section.classList.remove('active'));
+
+            // 移除所有标签的active状态
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // 移除侧边导航的active状态
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            sidebarLinks.forEach(link => link.classList.remove('active'));
+
+            // 显示选中的量表
+            const scaleElement = document.getElementById(scaleId);
+            if (scaleElement) {
+                scaleElement.classList.add('active');
+            }
+
+            // 更新导航标签状态（如果是从标签点击）
+            if (event && event.target && event.target.classList.contains('nav-tab')) {
+                event.target.classList.add('active');
+            } else {
+                // 如果从侧边栏点击，找到对应的标签并激活
+                const matchingTab = document.querySelector(`.nav-tab[onclick*="'${scaleId}'"]`);
+                if (matchingTab) {
+                    matchingTab.classList.add('active');
+                }
+            }
+
+            // 滚动到顶部
+            document.querySelector('.content').scrollTop = 0;
+        }
+
+        // ECOG计算
+        function calculateECOG() {
+            const ecogValue = document.querySelector('input[name="ecog"]:checked');
+            const resultSection = document.getElementById('ecog-result');
+            const resultContent = document.getElementById('ecog-content');
+
+            if (!ecogValue) {
+                alert('请先选择患者的功能状态！');
+                return;
+            }
+
+            const level = ecogValue.value;
+            let resultText = '';
+            let implication = '';
+
+            switch(level) {
+                case '0':
+                    resultText = '0级 - 完全活动';
+                    implication = '能耐受强化疗或联合治疗';
+                    break;
+                case '1':
+                    resultText = '1级 - 重体力活动受限';
+                    implication = '能耐受大多数化疗';
+                    break;
+                case '2':
+                    resultText = '2级 - 生活自理';
+                    implication = '可考虑单药化疗或减量联合化疗';
+                    break;
+                case '3':
+                    resultText = '3级 - 部分自理';
+                    implication = '可考虑支持治疗或低剂量化疗';
+                    break;
+                case '4':
+                    resultText = '4级 - 完全丧失活动能力';
+                    implication = '仅能考虑支持治疗';
+                    break;
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>ECOG分级：</strong><span class="risk-group risk-low">${resultText}</span>
+                </div>
+                <p><strong>临床意义：</strong>${implication}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // KPS计算
+        function calculateKPS() {
+            const kpsValue = document.querySelector('input[name="kps"]:checked');
+            const resultSection = document.getElementById('kps-result');
+            const resultContent = document.getElementById('kps-content');
+
+            if (!kpsValue) {
+                alert('请先选择患者的功能状态！');
+                return;
+            }
+
+            const score = kpsValue.value;
+            let statusText = '';
+            let ecogEq = '';
+
+            switch(score) {
+                case '100': statusText = '100分 - 正常'; ecogEq = '≈ ECOG 0级'; break;
+                case '90': statusText = '90分 - 正常活动'; ecogEq = '≈ ECOG 0-1级'; break;
+                case '80': statusText = '80分 - 正常活动需努力'; ecogEq = '≈ ECOG 1级'; break;
+                case '70': statusText = '70分 - 不能正常工作'; ecogEq = '≈ ECOG 1-2级'; break;
+                case '60': statusText = '60分 - 需要偶尔帮助'; ecogEq = '≈ ECOG 2级'; break;
+                case '50': statusText = '50分 - 需要大量帮助'; ecogEq = '≈ ECOG 3级'; break;
+                case '40': statusText = '40分 - 丧失活动能力'; ecogEq = '≈ ECOG 3级'; break;
+                case '30': statusText = '30分 - 严重丧失活动能力'; ecogEq = '≈ ECOG 3-4级'; break;
+                case '20': statusText = '20分 - 病重'; ecogEq = '≈ ECOG 4级'; break;
+                case '10': statusText = '10分 - 濒死'; ecogEq = '≈ ECOG 4级'; break;
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>KPS评分：</strong><span class="risk-group risk-low">${statusText}</span>
+                </div>
+                <p><strong>ECOG对应：</strong>${ecogEq}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // IPI计算
+        function calculateIPI() {
+            const checkboxes = ['i_age', 'i_ldh', 'i_ecog', 'i_stage', 'i_extranodal'];
+            let score = 0;
+
+            checkboxes.forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox && checkbox.checked) score++;
+            });
+
+            const resultSection = document.getElementById('i-result');
+            const resultContent = document.getElementById('i-content');
+
+            let riskGroup = '';
+            let riskClass = '';
+            let survival = '';
+
+            switch(score) {
+                case 0:
+                case 1:
+                    riskGroup = '低危（0-1分）';
+                    riskClass = 'risk-low';
+                    survival = '5年生存率约73%';
+                    break;
+                case 2:
+                    riskGroup = '低中危（2分）';
+                    riskClass = 'risk-low';
+                    survival = '5年生存率约51%';
+                    break;
+                case 3:
+                    riskGroup = '高中危（3分）';
+                    riskClass = 'risk-intermediate';
+                    survival = '5年生存率约43%';
+                    break;
+                default:
+                    riskGroup = '高危（4-5分）';
+                    riskClass = 'risk-high';
+                    survival = '5年生存率约26%';
+                    break;
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>IPI评分：</strong><span class="${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // FLIPI计算
+        function calculateFLIPI() {
+            const checkboxes = ['flipi_age', 'flipi_stage', 'flipi_hb', 'flipi_nodes', 'flipi_ldh'];
+            let score = 0;
+
+            checkboxes.forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox && checkbox.checked) score++;
+            });
+
+            const resultSection = document.getElementById('flipi-result');
+            const resultContent = document.getElementById('flipi-content');
+
+            let riskGroup = '';
+            let riskClass = '';
+            let survival = '';
+
+            switch(score) {
+                case 0:
+                case 1:
+                    riskGroup = '低危（0-1分）';
+                    riskClass = 'risk-low';
+                    survival = '5年生存率约91%';
+                    break;
+                case 2:
+                    riskGroup = '中危（2分）';
+                    riskClass = 'risk-intermediate';
+                    survival = '5年生存率约78%';
+                    break;
+                default:
+                    riskGroup = '高危（3-5分）';
+                    riskClass = 'risk-high';
+                    survival = '5年生存率约52%';
+                    break;
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>FLIPI评分：</strong><span class="${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // MIPI计算
+        function calculateMIPI() {
+            const age = document.querySelector('input[name="mipi_age"]:checked');
+            const ecog = document.querySelector('input[name="mipi_ecog"]:checked');
+            const ldh = document.querySelector('input[name="mipi_ldh"]:checked');
+            const wbc = document.querySelector('input[name="mipi_wbc"]:checked');
+
+            if (!age || !ecog || !ldh || !wbc) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let score = parseInt(age.value) + parseInt(ecog.value) + parseInt(ldh.value) + parseInt(wbc.value);
+
+            const resultSection = document.getElementById('mipi-result');
+            const resultContent = document.getElementById('mipi-content');
+
+            let riskGroup = '';
+            let riskClass = '';
+            let survival = '';
+
+            if (score <= 3) {
+                riskGroup = '低危（0-3分）';
+                riskClass = 'risk-low';
+                survival = '中位OS未达到（5年OS约60%）';
+            } else if (score <= 5) {
+                riskGroup = '中危（4-5分）';
+                riskClass = 'risk-intermediate';
+                survival = '中位OS约51个月';
+            } else {
+                riskGroup = '高危（6-11分）';
+                riskClass = 'risk-high';
+                survival = '中位OS约29个月';
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>MIPI评分：</strong><span class="${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // Ann Arbor分期
+        function calculateAnnArbor() {
+            const stage = document.querySelector('input[name="annarbor"]:checked');
+            const symptoms = document.querySelector('input[name="annarbor_symptoms"]:checked');
+
+            if (!stage || !symptoms) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            const resultSection = document.getElementById('annarbor-result');
+            const resultContent = document.getElementById('annarbor-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>Ann Arbor分期：</strong><span class="risk-group risk-low">${stage.value}期${symptoms.value}</span>
+                </div>
+                <p><strong>分期意义：</strong></p>
+                <ul>
+                    <li>I期：单个淋巴结区域或淋巴外器官受累</li>
+                    <li>II期：横膈同侧两个或以上淋巴结区域</li>
+                    <li>III期：横膈两侧淋巴结区域</li>
+                    <li>IV期：弥漫性或播散性累及淋巴外器官</li>
+                </ul>
+                <p><strong>全身症状：</strong>${symptoms.value === 'A' ? '无全身症状（A）' : '有B症状（发热、盗汗、体重下降>10%）（B）'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // ISS计算
+        function calculateISS() {
+            const b2m = document.querySelector('input[name="iss_b2m"]:checked');
+            const alb = document.querySelector('input[name="iss_alb"]:checked');
+
+            if (!b2m || !alb) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let stage = '';
+            let stageClass = '';
+            let survival = '';
+
+            if (b2m.value === 'low' && alb.value === 'high') {
+                stage = 'I期';
+                stageClass = 'risk-low';
+                survival = '中位生存约62个月';
+            } else if ((b2m.value === 'low' && alb.value === 'low') ||
+                       (b2m.value === 'mid' && alb.value === 'high') ||
+                       (b2m.value === 'mid' && alb.value === 'low')) {
+                stage = 'II期';
+                stageClass = 'risk-intermediate';
+                survival = '中位生存约44个月';
+            } else {
+                stage = 'III期';
+                stageClass = 'risk-high';
+                survival = '中位生存约29个月';
+            }
+
+            const resultSection = document.getElementById('iss-result');
+            const resultContent = document.getElementById('iss-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>ISS分期：</strong><span class="${stageClass}">${stage}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // R-ISS计算
+        function calculateRISS() {
+            const b2m = document.querySelector('input[name="riss_b2m"]:checked');
+            const alb = document.querySelector('input[name="riss_alb"]:checked');
+            const ldh = document.querySelector('input[name="riss_ldh"]:checked');
+            const fish = document.querySelector('input[name="riss_fish"]:checked');
+
+            if (!b2m || !alb || !ldh || !fish) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let stage = '';
+            let stageClass = '';
+            let survival = '';
+
+            if (b2m.value === 'low' && alb.value === 'high' && ldh.value === 'normal' && fish.value === 'no') {
+                stage = 'I期';
+                stageClass = 'risk-low';
+                survival = '5年OS约82%';
+            } else if (b2m.value === 'high' || alb.value === 'low' || ldh.value === 'high' || fish.value === 'yes') {
+                if (b2m.value === 'high' && fish.value === 'yes') {
+                    stage = 'III期';
+                    stageClass = 'risk-high';
+                    survival = '5年OS约40%';
+                } else {
+                    stage = 'II期';
+                    stageClass = 'risk-intermediate';
+                    survival = '5年OS约62%';
+                }
+            }
+
+            const resultSection = document.getElementById('riss-result');
+            const resultContent = document.getElementById('riss-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>R-ISS分期：</strong><span class="${stageClass}">${stage}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+                <p><strong>注意：</strong>R-ISS是当前MM最常用的预后评估系统。</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // DS分期计算
+        function calculateDS() {
+            const hb = document.querySelector('input[name="ds_hb"]:checked');
+            const ca = document.querySelector('input[name="ds_ca"]:checked');
+            const bone = document.querySelector('input[name="ds_bone"]:checked');
+            const m = document.querySelector('input[name="ds_m"]:checked');
+
+            if (!hb || !ca || !bone || !m) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let score = parseInt(hb.value) + parseInt(ca.value) + parseInt(bone.value) + parseInt(m.value);
+
+            let stage = '';
+            let stageClass = '';
+
+            if (score <= 1) {
+                stage = 'I期（低肿瘤负荷）';
+                stageClass = 'risk-low';
+            } else if (score <= 3) {
+                stage = 'II期（中肿瘤负荷）';
+                stageClass = 'risk-intermediate';
+            } else {
+                stage = 'III期（高肿瘤负荷）';
+                stageClass = 'risk-high';
+            }
+
+            const resultSection = document.getElementById('ds-result');
+            const resultContent = document.getElementById('ds-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>DS分期：</strong><span class="${stageClass}">${stage}</span>
+                </div>
+                <p><strong>总分：</strong>${score}分</p>
+                <p><strong>注意：</strong>DS分期已被ISS/R-ISS取代用于预后评估，但在评估肿瘤负荷方面仍有价值。</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // IPSS-R计算
+        function calculateIPSSR() {
+            const cyto = document.querySelector('input[name="ipssr_cyto"]:checked');
+            const blast = document.querySelector('input[name="ipssr_blast"]:checked');
+            const hb = document.querySelector('input[name="ipssr_hb"]:checked');
+            const plt = document.querySelector('input[name="ipssr_plt"]:checked');
+            const anc = document.querySelector('input[name="ipssr_anc"]:checked');
+
+            if (!cyto || !blast || !hb || !plt || !anc) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let score = parseInt(cyto.value) + parseInt(blast.value) + parseInt(hb.value) + parseInt(plt.value) + parseInt(anc.value);
+
+            let riskGroup = '';
+            let riskClass = '';
+            let survival = '';
+
+            if (score <= 1) {
+                riskGroup = '极低危（0-1分）';
+                riskClass = 'risk-low';
+                survival = '中位OS未达（8.8年）';
+            } else if (score <= 3) {
+                riskGroup = '低危（2-3分）';
+                riskClass = 'risk-low';
+                survival = '中位OS 5.3年';
+            } else if (score <= 5) {
+                riskGroup = '中危（4-5分）';
+                riskClass = 'risk-intermediate';
+                survival = '中位OS 3.0年';
+            } else if (score <= 7) {
+                riskGroup = '高危（6-7分）';
+                riskClass = 'risk-high';
+                survival = '中位OS 1.5年';
+            } else {
+                riskGroup = '极高危（>7分）';
+                riskClass = 'risk-high';
+                survival = '中位OS 0.8年';
+            }
+
+            const resultSection = document.getElementById('ipssr-result');
+            const resultContent = document.getElementById('ipssr-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>IPSS-R评分：</strong><span class="${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+                <p><strong>5年AML进展风险：</strong>${score <= 1 ? '3%' : score <= 3 ? '10%' : score <= 5 ? '21%' : score <= 7 ? '37%' : '57%'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // IPSS-M计算（简化版）
+        function calculateIPSSM() {
+            const base = document.querySelector('input[name="ipssm_base"]:checked');
+            const tp53 = document.getElementById('ipssm_tp53');
+            const sf3b1 = document.getElementById('ipssm_sf3b1');
+
+            if (!base) {
+                alert('请选择IPSS-R基线风险！');
+                return;
+            }
+
+            let resultSection = document.getElementById('ipssm-result');
+            let resultContent = document.getElementById('ipssm-content');
+
+            let adjustText = '';
+            if (tp53 && tp53.checked) {
+                adjustText = '⚠️ TP53突变显著增加风险，建议考虑IPSS-M高危组';
+            } else if (sf3b1 && sf3b1.checked && !document.getElementById('ipssm_other').checked) {
+                adjustText = '✓ SF3B1单独突变降低风险，可能下调1个风险组';
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>IPSS-M基线：</strong><span class="risk-group risk-intermediate">${base.value}</span>
+                </div>
+                <p><strong>基因调整：</strong>${adjustText || '无明显影响基因'}</p>
+                <p><strong>说明：</strong>IPSS-M需要结合完整的基因突变谱进行精确计算。建议使用专业IPSS-M计算工具或咨询血液科专家。</p>
+                <p><strong>临床意义：</strong>IPSS-M（2022年发布）是当前MDS最精确的预后工具，2025-2026年将逐步在临床推广。</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // IPSS计算（骨髓纤维化）
+        function calculateIPSS() {
+            const checkboxes = ['ipss_age', 'ipss_hb', 'ipss_wbc', 'ipss_blast', 'ipss_symptoms'];
+            let score = 0;
+
+            checkboxes.forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox && checkbox.checked) score++;
+            });
+
+            let riskGroup = '';
+            let riskClass = '';
+            let survival = '';
+
+            switch(score) {
+                case 0:
+                    riskGroup = '低危（0分）';
+                    riskClass = 'risk-low';
+                    survival = '中位OS约11年';
+                    break;
+                case 1:
+                    riskGroup = '中危-1（1分）';
+                    riskClass = 'risk-low';
+                    survival = '中位OS约8年';
+                    break;
+                case 2:
+                    riskGroup = '中危-2（2分）';
+                    riskClass = 'risk-intermediate';
+                    survival = '中位OS约4年';
+                    break;
+                default:
+                    riskGroup = '高危（≥3分）';
+                    riskClass = 'risk-high';
+                    survival = '中位OS约2年';
+                    break;
+            }
+
+            const resultSection = document.getElementById('ipss-result');
+            const resultContent = document.getElementById('ipss-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>IPSS评分：</strong><span class="${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // DIPSS计算
+        function calculateDIPSS() {
+            let score = 0;
+
+            if (document.getElementById('dipss_age').checked) score += 1;
+            if (document.getElementById('dipss_hb').checked) score += 2;
+            if (document.getElementById('dipss_wbc').checked) score += 1;
+            if (document.getElementById('dipss_blast').checked) score += 1;
+            if (document.getElementById('dipss_symptoms').checked) score += 1;
+
+            let riskGroup = '';
+            let riskClass = '';
+            let survival = '';
+
+            if (score <= 1) {
+                riskGroup = '低危（0-1分）';
+                riskClass = 'risk-low';
+                survival = '中位OS约15年';
+            } else if (score <= 2) {
+                riskGroup = '中危-1（2分）';
+                riskClass = 'risk-low';
+                survival = '中位OS约7年';
+            } else if (score <= 4) {
+                riskGroup = '中危-2（3-4分）';
+                riskClass = 'risk-intermediate';
+                survival = '中位OS约3.5年';
+            } else {
+                riskGroup = '高危（5-6分）';
+                riskClass = 'risk-high';
+                survival = '中位OS约1.5年';
+            }
+
+            const resultSection = document.getElementById('dipss-result');
+            const resultContent = document.getElementById('dipss-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>DIPSS评分：</strong><span class="${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // IPSET-thrombosis计算
+        function calculateIPSET() {
+            let score = 0;
+
+            if (document.getElementById('ipset_age').checked) score += 1;
+            if (document.getElementById('ipset_cv').checked) score += 1;
+            if (document.getElementById('ipset_thrombosis').checked) score += 2;
+            if (document.getElementById('ipset_jak2').checked) score += 2;
+
+            let riskGroup = '';
+            let riskClass = '';
+            let thrombosisRisk = '';
+
+            if (score === 0) {
+                riskGroup = '低危（0分）';
+                riskClass = 'risk-low';
+                thrombosisRisk = '年血栓风险约1-2%';
+            } else if (score <= 2) {
+                riskGroup = '中危（1-2分）';
+                riskClass = 'risk-intermediate';
+                thrombosisRisk = '年血栓风险约2-3%';
+            } else {
+                riskGroup = '高危（≥3分）';
+                riskClass = 'risk-high';
+                thrombosisRisk = '年血栓风险约5-10%';
+            }
+
+            const resultSection = document.getElementById('ipset-result');
+            const resultContent = document.getElementById('ipset-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>IPSET-thrombosis评分：</strong><span class="${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <p><strong>血栓风险：</strong>${thrombosisRisk}</p>
+                <p><strong>抗栓建议：</strong>${score <= 2 ? '阿司匹林' : '阿司匹林 + 降细胞治疗'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // Sokal评分计算
+        function calculateSokal() {
+            const age = parseFloat(document.getElementById('sokal_age').value);
+            const spleen = parseFloat(document.getElementById('sokal_spleen').value);
+            const plt = parseFloat(document.getElementById('sokar_plt').value);
+            const blast = parseFloat(document.getElementById('sokal_blast').value);
+
+            if (isNaN(age) || isNaN(spleen) || isNaN(plt) || isNaN(blast)) {
+                alert('请输入所有数值！');
+                return;
+            }
+
+            const sokalScore = 0.0116 * (age - 43.4) + 0.0345 * (spleen - 7.51) + 0.188 * Math.pow(plt / 700, 2) + 0.0887 * (blast - 2.1);
+
+            let riskGroup = '';
+            let riskClass = '';
+
+            if (sokalScore < 0.8) {
+                riskGroup = '低危';
+                riskClass = 'risk-low';
+            } else if (sokalScore <= 1.2) {
+                riskGroup = '中危';
+                riskClass = 'risk-intermediate';
+            } else {
+                riskGroup = '高危';
+                riskClass = 'risk-high';
+            }
+
+            const resultSection = document.getElementById('sokal-result');
+            const resultContent = document.getElementById('sokal-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>Sokal评分：</strong><span class="${riskClass}">${sokalScore.toFixed(3)} - ${riskGroup}</span>
+                </div>
+                <p><strong>预后：</strong>${riskGroup === '低危' ? '5年生存率约90%' : riskGroup === '中危' ? '5年生存率约80%' : '5年生存率约65%'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // EUTOS评分计算
+        function calculateEUTOS() {
+            const basophil = parseFloat(document.getElementById('eutos_basophil').value);
+            const spleen = parseFloat(document.getElementById('eutos_spleen').value);
+
+            if (isNaN(basophil) || isNaN(spleen)) {
+                alert('请输入所有数值！');
+                return;
+            }
+
+            const eutosScore = 7 * basophil + 4 * spleen;
+
+            let riskGroup = '';
+            let riskClass = '';
+
+            if (eutosScore <= 87) {
+                riskGroup = '低危';
+                riskClass = 'risk-low';
+            } else {
+                riskGroup = '高危';
+                riskClass = 'risk-high';
+            }
+
+            const resultSection = document.getElementById('eutos-result');
+            const resultContent = document.getElementById('eutos-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>EUTOS评分：</strong><span class="${riskClass}">${eutosScore} - ${riskGroup}</span>
+                </div>
+                <p><strong>5年累积CCyR率：</strong>${riskGroup === '低危' ? '约90%' : '约70%'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // ISTH DIC计算
+        function calculateISTH() {
+            const plt = document.querySelector('input[name="isth_plt"]:checked');
+            const ddimer = document.querySelector('input[name="isth_ddimer"]:checked');
+            const pt = document.querySelector('input[name="isth_pt"]:checked');
+            const fibrinogen = document.querySelector('input[name="isth_fibrinogen"]:checked');
+
+            if (!plt || !ddimer || !pt || !fibrinogen) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let score = parseInt(plt.value) + parseInt(ddimer.value) + parseInt(pt.value) + parseInt(fibrinogen.value);
+
+            const resultSection = document.getElementById('isth-result');
+            const resultContent = document.getElementById('isth-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>ISTH DIC评分：</strong><span class="${score >= 5 ? 'risk-group risk-high' : 'risk-group risk-low'}">${score}分</span>
+                </div>
+                <p><strong>结果判读：</strong></p>
+                <ul>
+                    <li>评分≥5分：显性DIC，每日重复评分</li>
+                    <li>评分<5分：非显性DIC，1-2日后重复评分</li>
+                </ul>
+                <p><strong>临床意义：</strong>${score >= 5 ? '⚠️ 符合显性DIC诊断，建议立即治疗' : '✓ 暂不符合显性DIC诊断，需动态监测'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // 4T's评分计算
+        function calculate4T() {
+            const plt = document.querySelector('input[name="4t_plt"]:checked');
+            const time = document.querySelector('input[name="4t_time"]:checked');
+            const thrombosis = document.querySelector('input[name="4t_thrombosis"]:checked');
+            const other = document.querySelector('input[name="4t_other"]:checked');
+
+            if (!plt || !time || !thrombosis || !other) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let score = parseInt(plt.value) + parseInt(time.value) + parseInt(thrombosis.value) + parseInt(other.value);
+
+            let probability = '';
+            let probabilityClass = '';
+            let action = '';
+
+            if (score <= 3) {
+                probability = '低度可能（0-3分）';
+                probabilityClass = 'risk-low';
+                action = '寻找其他血小板减少原因，可继续肝素治疗（临床密切监测）';
+            } else if (score <= 5) {
+                probability = '中度可能（4-5分）';
+                probabilityClass = 'risk-intermediate';
+                action = '停用肝素，考虑启动非肝素抗凝剂，进行HIT抗体检测';
+            } else {
+                probability = '高度可能（6-8分）';
+                probabilityClass = 'risk-high';
+                action = '停用肝素，启动非肝素抗凝剂（阿加曲班、比伐卢定），进行HIT抗体检测';
+            }
+
+            const resultSection = document.getElementById('4t-result');
+            const resultContent = document.getElementById('4t-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>4T's评分：</strong><span class="${probabilityClass}">${score}分 - ${probability}</span>
+                </div>
+                <p><strong>HIT概率：</strong>${probability}</p>
+                <p><strong>处理建议：</strong>${action}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // HAS-BLED计算
+        function calculateHASBLED() {
+            const checkboxes = ['hasbled_htn', 'hasbled_renal', 'hasbled_liver', 'hasbled_stroke',
+                              'hasbled_bleeding', 'hasbled_inr', 'hasbled_age', 'hasbled_drugs'];
+            let score = 0;
+
+            checkboxes.forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox && checkbox.checked) score++;
+            });
+
+            let riskLevel = '';
+            let riskClass = '';
+            let bleedingRisk = '';
+
+            if (score <= 1) {
+                riskLevel = '低危（0-1分）';
+                riskClass = 'risk-low';
+                bleedingRisk = '年出血风险1.13%';
+            } else if (score === 2) {
+                riskLevel = '中危（2分）';
+                riskClass = 'risk-intermediate';
+                bleedingRisk = '年出血风险1.88%';
+            } else if (score === 3) {
+                riskLevel = '高危（3分）';
+                riskClass = 'risk-high';
+                bleedingRisk = '年出血风险3.74%';
+            } else {
+                riskLevel = '极高危（≥4分）';
+                riskClass = 'risk-high';
+                bleedingRisk = '年出血风险8.70%';
+            }
+
+            const resultSection = document.getElementById('hasbled-result');
+            const resultContent = document.getElementById('hasbled-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>HAS-BLED评分：</strong><span class="${riskClass}">${score}分 - ${riskLevel}</span>
+                </div>
+                <p><strong>出血风险：</strong>${bleedingRisk}</p>
+                <p><strong>注意：</strong></p>
+                <ul>
+                    <li>高分不是抗凝禁忌，但需要纠正可逆危险因素</li>
+                    <li>高出血风险患者可考虑使用DOACs而非华法林</li>
+                    <li>需要更密切的INR监测（如使用华法林）</li>
+                </ul>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // Wells评分计算
+        function calculateWells() {
+            let score = 0;
+
+            const checkedItems = document.querySelectorAll('[id^="wells_"]:checked');
+            checkedItems.forEach(item => {
+                if (item.id.includes('cancer') || item.id.includes('paralysis')) {
+                    score += 1.5;
+                } else if (item.id !== 'wells_alternative') {
+                    score += 1;
+                }
+            });
+
+            const alternative = document.querySelector('input[name="wells_alternative"]:checked');
+            if (alternative && alternative.value === 'yes') {
+                score -= 2;
+            }
+
+            let probability = '';
+            let probabilityClass = '';
+            let vteRisk = '';
+
+            if (score <= 1) {
+                probability = '低度可能';
+                probabilityClass = 'risk-low';
+                vteRisk = 'DVT/PE概率约6%';
+            } else if (score <= 6) {
+                probability = '中度可能';
+                probabilityClass = 'risk-intermediate';
+                vteRisk = 'DVT/PE概率约28%';
+            } else {
+                probability = '高度可能';
+                probabilityClass = 'risk-high';
+                vteRisk = 'DVT/PE概率约52%';
+            }
+
+            const resultSection = document.getElementById('wells-result');
+            const resultContent = document.getElementById('wells-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>Wells评分：</strong><span class="${probabilityClass}">${score.toFixed(1)}分 - ${probability}</span>
+                </div>
+                <p><strong>VTE概率：</strong>${vteRisk}</p>
+                <p><strong>处理建议：</strong>${score <= 1 ? '可考虑D-二聚体排除，无需立即影像学检查' : score <= 6 ? '需要进行D-二聚体和/或影像学检查' : '高度怀疑VTE，建议立即抗凝治疗并进行影像学检查'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // Padua评分计算
+        function calculatePadua() {
+            let score = 0;
+
+            if (document.getElementById('padua_cancer').checked) score += 3;
+            if (document.getElementById('padua_history').checked) score += 3;
+            if (document.getElementById('padua_reduced').checked) score += 3;
+            if (document.getElementById('padua_highrisk').checked) score += 3;
+            if (document.getElementById('padua_age').checked) score += 1;
+            if (document.getElementById('padua_heart').checked) score += 1;
+            if (document.getElementById('padua_mi').checked) score += 1;
+            if (document.getElementById('padua_obesity').checked) score += 1;
+            if (document.getElementById('padua_hormones').checked) score += 1;
+
+            let riskGroup = '';
+            let riskClass = '';
+            let vteRisk = '';
+
+            if (score <= 3) {
+                riskGroup = '低危（0-3分）';
+                riskClass = 'risk-low';
+                vteRisk = 'VTE风险约0.3%，无需药物预防';
+            } else {
+                riskGroup = '高危（≥4分）';
+                riskClass = 'risk-high';
+                vteRisk = 'VTE风险约11%，需要药物预防';
+            }
+
+            const resultSection = document.getElementById('padua-result');
+            const resultContent = document.getElementById('padua-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>Padua评分：</strong><span class="${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <p><strong>VTE风险：</strong>${vteRisk}</p>
+                <p><strong>预防建议：</strong>${score <= 3 ? '无需药物预防，可考虑机械预防' : '建议药物预防（低分子肝素、华法林、DOACs），除非有出血禁忌'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // HCT-CI计算
+        function calculateHCTCI() {
+            const scoreValue = document.querySelector('input[name="hctci_score"]:checked');
+
+            if (!scoreValue) {
+                alert('请选择总分！');
+                return;
+            }
+
+            let riskGroup = '';
+            let riskClass = '';
+            let nrm = '';
+
+            switch(scoreValue.value) {
+                case '0':
+                    riskGroup = '0分（无合并症）';
+                    riskClass = 'risk-low';
+                    nrm = '2年NRM约14%';
+                    break;
+                case '1-2':
+                    riskGroup = '1-2分（低危）';
+                    riskClass = 'risk-low';
+                    nrm = '2年NRM约21%';
+                    break;
+                case '3-4':
+                    riskGroup = '3-4分（中危）';
+                    riskClass = 'risk-intermediate';
+                    nrm = '2年NRM约41%';
+                    break;
+                case '5plus':
+                    riskGroup = '≥5分（高危）';
+                    riskClass = 'risk-high';
+                    nrm = '2年NRM约50%以上';
+                    break;
+            }
+
+            const resultSection = document.getElementById('hctci-result');
+            const resultContent = document.getElementById('hctci-content');
+
+            const checkedCount = document.querySelectorAll('.hctci-item:checked').length;
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>HCT-CI评分：</strong><span class="${riskClass}">${riskGroup}</span>
+                </div>
+                <p><strong>合并症数量：</strong>${checkedCount}项</p>
+                <p><strong>预后评估：</strong>${nrm}</p>
+                <p><strong>移植建议：</strong>${scoreValue.value === '5plus' ? '移植风险高，需仔细评估' : '移植风险可接受，可考虑标准移植方案'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // NRS2002计算
+        function calculateNRS2002() {
+            const nutri = document.querySelector('input[name="nrs2002_nutri"]:checked');
+            const disease = document.querySelector('input[name="nrs2002_disease"]:checked');
+            const age = document.querySelector('input[name="nrs2002_age"]:checked');
+
+            if (!nutri || !disease || !age) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let score = parseInt(nutri.value) + parseInt(disease.value) + parseInt(age.value);
+
+            const resultSection = document.getElementById('nrs2002-result');
+            const resultContent = document.getElementById('nrs2002-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>NRS2002评分：</strong><span class="${score >= 3 ? 'risk-group risk-high' : 'risk-group risk-low'}">${score}分</span>
+                </div>
+                <p><strong>结果判读：</strong></p>
+                <ul>
+                    <li>NRS < 3分：每周复查营养状态</li>
+                    <li>NRS ≥ 3分：存在营养风险，需要营养支持治疗</li>
+                </ul>
+                <p><strong>临床意义：</strong>${score >= 3 ? '⚠️ 存在营养风险，建议营养科会诊，制定营养支持计划' : '✓ 暂无营养风险'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // 疼痛NRS计算
+        function calculateNRS_Pain() {
+            const nrsValue = document.querySelector('input[name="nrs_pain"]:checked');
+
+            if (!nrsValue) {
+                alert('请先选择疼痛程度！');
+                return;
+            }
+
+            const score = parseInt(nrsValue.value);
+            let severity = '';
+            let severityClass = '';
+            let intervention = '';
+
+            if (score === 0) {
+                severity = '无痛';
+                severityClass = 'risk-low';
+                intervention = '继续观察，无需止痛治疗';
+            } else if (score <= 3) {
+                severity = '轻度疼痛';
+                severityClass = 'risk-low';
+                intervention = '可考虑非甾体抗炎药或弱阿片类药物';
+            } else if (score <= 6) {
+                severity = '中度疼痛';
+                severityClass = 'risk-intermediate';
+                intervention = '建议使用阿片类药物镇痛';
+            } else {
+                severity = '重度疼痛';
+                severityClass = 'risk-high';
+                intervention = '需要强阿片类药物，可能需要多模式镇痛';
+            }
+
+            const resultSection = document.getElementById('nrs-result');
+            const resultContent = document.getElementById('nrs-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>NRS评分：</strong><span class="${severityClass}">${severity}</span>
+                </div>
+                <p><strong>干预建议：</strong>${intervention}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // HADS简化版计算
+        function calculateHADS_Simple() {
+            const anxiety = document.querySelector('input[name="hads_anxiety"]:checked');
+            const depression = document.querySelector('input[name="hads_depression"]:checked');
+
+            if (!anxiety || !depression) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            const resultSection = document.getElementById('hads-result');
+            const resultContent = document.getElementById('hads-content');
+
+            let anxietyLevel = '';
+            let anxietyClass = '';
+            let depressionLevel = '';
+            let depressionClass = '';
+
+            switch(anxiety.value) {
+                case '0':
+                    anxietyLevel = '正常（0-7分）';
+                    anxietyClass = 'risk-low';
+                    break;
+                case '1':
+                    anxietyLevel = '轻度焦虑（8-10分）';
+                    anxietyClass = 'risk-low';
+                    break;
+                case '2':
+                    anxietyLevel = '中度焦虑（11-14分）';
+                    anxietyClass = 'risk-intermediate';
+                    break;
+                case '3':
+                    anxietyLevel = '重度焦虑（15-21分）';
+                    anxietyClass = 'risk-high';
+                    break;
+            }
+
+            switch(depression.value) {
+                case '0':
+                    depressionLevel = '正常（0-7分）';
+                    depressionClass = 'risk-low';
+                    break;
+                case '1':
+                    depressionLevel = '轻度抑郁（8-10分）';
+                    depressionClass = 'risk-low';
+                    break;
+                case '2':
+                    depressionLevel = '中度抑郁（11-14分）';
+                    depressionClass = 'risk-intermediate';
+                    break;
+                case '3':
+                    depressionLevel = '重度抑郁（15-21分）';
+                    depressionClass = 'risk-high';
+                    break;
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>焦虑评分：</strong><span class="${anxietyClass}">${anxietyLevel}</span>
+                </div>
+                <div class="result-highlight">
+                    <strong>抑郁评分：</strong><span class="${depressionClass}">${depressionLevel}</span>
+                </div>
+                <p><strong>建议：</strong>${parseInt(anxiety.value) >= 2 || parseInt(depression.value) >= 2 ? '建议心理科/精神科会诊' : '定期随访评估心理状态'}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // Binet分期计算
+        function calculateBinet() {
+            const hb = document.querySelector('input[name="binet_hb"]:checked');
+            const plt = document.querySelector('input[name="binet_plt"]:checked');
+            const nodes = document.querySelector('input[name="binet_nodes"]:checked');
+
+            if (!hb || !plt || !nodes) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let stage = '';
+            let stageClass = '';
+            let survival = '';
+
+            if (hb.value === 'normal' && plt.value === 'normal' && nodes.value === '0-2') {
+                stage = 'A期';
+                stageClass = 'risk-low';
+                survival = '中位生存 > 10年';
+            } else if ((hb.value === 'normal' && plt.value === 'normal') ||
+                       (hb.value === 'normal' && nodes.value === '0-2') ||
+                       (plt.value === 'normal' && nodes.value === '0-2')) {
+                stage = 'B期';
+                stageClass = 'risk-intermediate';
+                survival = '中位生存 5-7年';
+            } else {
+                stage = 'C期';
+                stageClass = 'risk-high';
+                survival = '中位生存 2-3年';
+            }
+
+            const resultSection = document.getElementById('binet-result');
+            const resultContent = document.getElementById('binet-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>Binet分期：</strong><span class="${stageClass}">${stage}</span>
+                </div>
+                <p><strong>预后评估：</strong>${survival}</p>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // CLL-IPI计算
+        function calculateCLLIPI() {
+            const checkboxes = ['cllipi_tp53', 'cllipi_ighv', 'cllipi_beta2', 'cllipi_stage', 'cllipi_age'];
+            let score = 0;
+
+            checkboxes.forEach(id => {
+                const checkbox = document.getElementById(id);
+                if (checkbox && checkbox.checked) {
+                    score++;
+                }
+            });
+
+            let riskGroup = '';
+            let riskClass = '';
+            let medianOS = '';
+            let recommendation = '';
+
+            if (score === 0) {
+                riskGroup = '低危组 (0分)';
+                riskClass = 'risk-low';
+                medianOS = '中位生存期未达到';
+                recommendation = '建议观察等待，无需立即治疗。';
+            } else if (score === 1) {
+                riskGroup = '低危组 (1分)';
+                riskClass = 'risk-low';
+                medianOS = '中位生存期未达到';
+                recommendation = '建议观察等待，定期随访。';
+            } else if (score === 2) {
+                riskGroup = '中危组 (2分)';
+                riskClass = 'risk-intermediate';
+                medianOS = '中位生存期约 12年';
+                recommendation = '根据临床症状和疾病活动度决定治疗时机。';
+            } else if (score === 3) {
+                riskGroup = '高危组 (3分)';
+                riskClass = 'risk-high';
+                medianOS = '中位生存期约 8年';
+                recommendation = '考虑更积极的治疗策略，如新型靶向药物(BTK抑制剂、BCL2抑制剂)或临床试验。';
+            } else if (score >= 4) {
+                riskGroup = '极高危组 (4-5分)';
+                riskClass = 'risk-high';
+                medianOS = '中位生存期约 3-5年';
+                recommendation = '建议尽早启动治疗，优选靶向药物联合方案或参加临床试验。';
+            }
+
+            const resultSection = document.getElementById('cllipi-result');
+            const resultContent = document.getElementById('cllipi-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>CLL-IPI评分：</strong><span class="risk-group ${riskClass}">${score}分 - ${riskGroup}</span>
+                </div>
+                <div class="clinical-implication">
+                    <strong>预后评估：</strong>${medianOS}
+                    <br><br>
+                    <strong>治疗建议：</strong>${recommendation}
+                </div>
+                <div class="prognosis-chart">
+                    <strong>危险度分层说明：</strong>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>低危(0-1分)：预后良好，可观察等待</li>
+                        <li>中危(2分)：预后中等，根据临床情况决定治疗时机</li>
+                        <li>高危(3分)：预后较差，建议积极治疗</li>
+                        <li>极高危(4-5分)：预后很差，需要立即治疗并考虑临床试验</li>
+                    </ul>
+                </div>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // CAR-T CRS分级计算
+        function calculateCARSCRS() {
+            const fever = document.querySelector('input[name="crs_fever"]:checked');
+            const bp = document.querySelector('input[name="crs_bp"]:checked');
+            const oxygen = document.querySelector('input[name="crs_oxygen"]:checked');
+
+            const resultSection = document.getElementById('carstcrs-result');
+            const resultContent = document.getElementById('carstcrs-content');
+
+            if (!fever || !bp || !oxygen) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            let grade = 0;
+            let gradeClass = 'risk-low';
+            let management = '';
+
+            // CRS分级逻辑
+            const bpValue = parseInt(bp.value);
+            const hasFever = fever.value === 'yes';
+            const needsOxygen = oxygen.value === 'yes';
+
+            if (!hasFever) {
+                grade = 0;
+                gradeClass = 'risk-low';
+                management = '无需特殊处理，继续观察。';
+            } else if (hasFever && bpValue === 0) {
+                grade = 1;
+                gradeClass = 'risk-intermediate';
+                management = '对症处理：退热药、补液。密切观察。';
+            } else if (hasFever && bpValue === 1 && !needsOxygen) {
+                grade = 2;
+                gradeClass = 'risk-intermediate';
+                management = '需要补液、低剂量升压药。密切监测。';
+            } else if (hasFever && (bpValue === 2 || needsOxygen)) {
+                grade = 3;
+                gradeClass = 'risk-high';
+                management = '需要住院治疗，升压药、吸氧、考虑托珠单抗(tocilizumab)治疗。';
+            } else if (hasFever && bpValue === 3) {
+                grade = 4;
+                gradeClass = 'risk-high';
+                management = '危及生命！需要ICU，多种升压药，托珠单抗+激素，必要时呼吸支持。';
+            } else if (hasFever && bpValue === 4) {
+                grade = 4;
+                gradeClass = 'risk-high';
+                management = '危及生命！需要立即抢救，ICU治疗，多器官支持。';
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>CRS分级：</strong><span class="risk-group ${gradeClass}">${grade}级</span>
+                </div>
+                <div class="clinical-implication">
+                    <strong>处理建议：</strong>${management}
+                </div>
+                <div class="prognosis-chart">
+                    <strong>CRS分级说明：</strong>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>1级：发热，无需低血压治疗</li>
+                        <li>2级：发热+低血压（无需升压药或仅需一种）</li>
+                        <li>3级：发热+低血压（需多种升压药）或需吸氧</li>
+                        <li>4级：危及生命的低血压/缺氧</li>
+                    </ul>
+                </div>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // ICANS分级计算
+        function calculateICANS() {
+            const resultSection = document.getElementById('carsticans-result');
+            const resultContent = document.getElementById('carsticans-content');
+
+            // 计算ICE评分
+            let iceScore = 0;
+
+            // 定向力 (0-4分)
+            if (document.getElementById('ice_year').checked) iceScore++;
+            if (document.getElementById('ice_month').checked) iceScore++;
+            if (document.getElementById('ice_day').checked) iceScore++;
+            if (document.getElementById('ice_city').checked) iceScore++;
+            if (document.getElementById('ice_hospital').checked) iceScore++;
+            if (iceScore > 4) iceScore = 4; // 定向力最多4分
+
+            // 命名能力 (0-3分)
+            const naming = document.getElementById('ice_naming').value;
+            if (naming) iceScore += parseInt(naming);
+
+            // 遵从指令 (0-1分)
+            if (document.getElementById('ice_commands').checked) iceScore++;
+
+            // 书写能力 (0-1分)
+            const writing = document.querySelector('input[name="ice_writing"]:checked');
+            if (writing && writing.value === '1') iceScore++;
+
+            // 注意力 (0-1分)
+            const attention = document.querySelector('input[name="ice_attention"]:checked');
+            if (attention && attention.value === '1') iceScore++;
+
+            // 意识水平
+            const loc = document.querySelector('input[name="icans_loc"]:checked');
+            const motor = document.querySelector('input[name="icans_motor"]:checked');
+
+            if (!loc || !motor) {
+                alert('请完成所有选项！');
+                return;
+            }
+
+            const locValue = parseInt(loc.value);
+            const motorValue = parseInt(motor.value);
+
+            // ICANS分级计算
+            let grade = 0;
+            let gradeClass = 'risk-low';
+            let management = '';
+
+            // ICE评分转换为分值（10-正常，0-最差）
+            const iceImpairment = 10 - iceScore;
+
+            if (iceImpairment === 0 && locValue === 0 && motorValue === 0) {
+                grade = 0;
+                gradeClass = 'risk-low';
+                management = '无神经毒性，继续观察。';
+            } else if ((iceImpairment >= 1 && iceImpairment <= 2) && locValue === 0 && motorValue === 0) {
+                grade = 1;
+                gradeClass = 'risk-low';
+                management = '轻度神经毒性，对症处理，密切观察。';
+            } else if ((iceImpairment >= 3 && iceImpairment <= 6) && locValue === 0 && motorValue === 0) {
+                grade = 2;
+                gradeClass = 'risk-intermediate';
+                management = '中度神经毒性，考虑激素治疗，神经科会诊。';
+            } else if (iceImpairment >= 7 || locValue === 1 || motorValue === 1) {
+                grade = 3;
+                gradeClass = 'risk-high';
+                management = '严重神经毒性，需要住院，激素治疗，神经科紧急会诊。';
+            } else if (locValue >= 2 || motorValue >= 2) {
+                grade = 4;
+                gradeClass = 'risk-high';
+                management = '危及生命！需要ICU，强化激素治疗，必要时使用其他免疫抑制剂。';
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>ICANS分级：</strong><span class="risk-group ${gradeClass}">${grade}级</span>
+                    <br>
+                    <strong>ICE评分：</strong>${iceScore}/10分
+                </div>
+                <div class="clinical-implication">
+                    <strong>处理建议：</strong>${management}
+                </div>
+                <div class="prognosis-chart">
+                    <strong>ICANS分级说明：</strong>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>1级：ICE评分8-9分，意识、运动正常</li>
+                        <li>2级：ICE评分4-7分，或意识/运动轻度异常</li>
+                        <li>3级：ICE评分0-3分，或意识/运动明显异常</li>
+                        <li>4级：昏迷、严重运动障碍或无反应</li>
+                    </ul>
+                </div>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // AML ELN 2022预后分层计算
+        function calculateAMLELN2022() {
+            const favorable = [
+                'aml_favor1', 'aml_favor2', 'aml_favor3', 'aml_favor4', 'aml_favor5'
+            ];
+            const adverse = [
+                'aml_adverse1', 'aml_adverse2', 'aml_adverse3', 'aml_adverse4',
+                'aml_adverse5', 'aml_adverse6', 'aml_adverse7', 'aml_adverse8',
+                'aml_adverse9', 'aml_adverse10', 'aml_adverse11', 'aml_adverse12'
+            ];
+
+            let hasFavorable = false;
+            let hasAdverse = false;
+
+            favorable.forEach(id => {
+                if (document.getElementById(id) && document.getElementById(id).checked) {
+                    hasFavorable = true;
+                }
+            });
+
+            adverse.forEach(id => {
+                if (document.getElementById(id) && document.getElementById(id).checked) {
+                    hasAdverse = true;
+                }
+            });
+
+            const resultSection = document.getElementById('amleln2022-result');
+            const resultContent = document.getElementById('amleln2022-content');
+
+            if (!hasFavorable && !hasAdverse) {
+                alert('请至少选择一个细胞遗传学或分子学异常！');
+                return;
+            }
+
+            let riskGroup = '';
+            let riskClass = '';
+            let recommendation = '';
+            let transplant = '';
+
+            if (hasAdverse) {
+                riskGroup = '预后不良组';
+                riskClass = 'risk-high';
+                recommendation = '建议强化化疗或靶向治疗后，尽早进行异基因造血干细胞移植评估。';
+                transplant = '强烈建议allo-HSCT（有合适供者）';
+            } else if (hasFavorable) {
+                riskGroup = '预后良好组';
+                riskClass = 'risk-low';
+                recommendation = '标准诱导化疗，无需常规allo-HSCT作为一线巩固治疗。';
+                transplant = '仅在复发时考虑allo-HSCT';
+            } else {
+                riskGroup = '中等预后组';
+                riskClass = 'risk-intermediate';
+                recommendation = '标准诱导化疗后根据MRD状态决定后续治疗。';
+                transplant = '根据MRD、合并症、供者情况综合考虑';
+            }
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>ELN 2022危险度分层：</strong><span class="risk-group ${riskClass}">${riskGroup}</span>
+                </div>
+                <div class="clinical-implication">
+                    <strong>治疗建议：</strong>${recommendation}
+                    <br><br>
+                    <strong>移植建议：</strong>${transplant}
+                </div>
+                <div class="prognosis-chart">
+                    <strong>预后说明：</strong>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>预后良好：5年生存率 >60%</li>
+                        <li>中等预后：5年生存率 30-50%</li>
+                        <li>预后不良：5年生存率 <20%</li>
+                    </ul>
+                </div>
+            `;
+
+            resultSection.classList.add('show');
+        }
+
+        // IPSS-M分子评分计算（简化版）
+        function calculateIPSSM() {
+            const resultSection = document.getElementById('ipssm-result');
+            const resultContent = document.getElementById('ipssm-content');
+
+            resultContent.innerHTML = `
+                <div class="result-highlight">
+                    <strong>提示：</strong><span class="risk-group risk-intermediate">IPSS-M评分系统较为复杂，需要结合IPSS-R的临床病理学参数和分子标志物进行计算。</span>
+                </div>
+                <div class="clinical-implication">
+                    <strong>说明：</strong>
+                    IPSS-M评分需要以下信息：
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>细胞遗传学分级（按IPSS-R标准）</li>
+                        <li>骨髓原始细胞百分比</li>
+                        <li>血红蛋白水平</li>
+                        <li>血小板计数</li>
+                        <li>中性粒细胞绝对值</li>
+                        <li>分子标志物（TP53, SF3B1, ASXL1, DNMT3A, U2AF1, RUNX1）</li>
+                    </ul>
+                    <br>
+                    <strong>建议：</strong>请使用专业软件或在线计算器进行精确评估。
+                </div>
+            `;
+
+            resultSection.classList.add('show');
+        }
+    </script>
+    </div>
+</body>
+</html>
